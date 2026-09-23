@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mockup 03 — Telemetry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@200;300;400;500&family=IBM+Plex+Sans:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#050807;
+  --panel:rgba(9,15,13,.55);
+  --ink:#d9e4e0;
+  --dim:#5f7370;
+  --line:rgba(110,231,168,.16);
+  --line2:rgba(110,231,168,.32);
+  --green:#6ee7a8;
+  --amber:#fbbf24;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--void);color:var(--ink);font-family:var(--mono);font-weight:300;overflow:hidden;cursor:none;-webkit-font-smoothing:antialiased}
+canvas.layer{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#stars{z-index:0}
+#spot{z-index:1}
+body::before{ /* instrument grid */
+  content:'';position:fixed;inset:0;z-index:2;pointer-events:none;opacity:.5;
+  background-image:linear-gradient(rgba(110,231,168,.045) 1px,transparent 1px),
+                   linear-gradient(90deg,rgba(110,231,168,.045) 1px,transparent 1px);
+  background-size:64px 64px;
+  mask-image:radial-gradient(120% 100% at 50% 50%,#000 20%,transparent 78%);
+}
+body::after{content:'';position:fixed;inset:0;z-index:55;pointer-events:none;
+  background:repeating-linear-gradient(to bottom,rgba(110,231,168,.02) 0 1px,transparent 1px 3px)}
+
+.shell{position:fixed;inset:26px;z-index:10;display:grid;
+  grid-template-columns:300px 1fr 344px;grid-template-rows:auto 1fr auto;gap:14px}
+
+/* ---------- panel primitive ---------- */
+.panel{
+  border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(10px);
+  position:relative;padding:14px 16px;
+}
+.panel::before,.panel::after{content:'';position:absolute;width:6px;height:6px;border:1px solid var(--line2)}
+.panel::before{left:-1px;top:-1px;border-right:0;border-bottom:0}
+.panel::after{right:-1px;bottom:-1px;border-left:0;border-top:0}
+.panel h2{
+  font-size:9px;font-weight:400;letter-spacing:.3em;color:var(--dim);text-transform:uppercase;
+  display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;
+}
+.panel h2 .id{color:rgba(110,231,168,.5)}
+.row{display:flex;justify-content:space-between;font-size:10.5px;letter-spacing:.08em;padding:4px 0;color:var(--dim)}
+.row b{font-weight:400;color:var(--ink)}
+.row.hl b{color:var(--green)}
+
+/* ---------- header strip ---------- */
+.strip{grid-column:1/4;display:flex;align-items:center;gap:0;height:38px;border:1px solid var(--line);background:var(--panel);backdrop-filter:blur(10px)}
+.strip .cell{padding:0 16px;height:100%;display:flex;align-items:center;gap:9px;font-size:10px;letter-spacing:.2em;text-transform:uppercase;border-right:1px solid var(--line);color:var(--dim)}
+.strip .cell:last-child{border-right:0;margin-left:auto}
+.strip .cell b{color:var(--ink);font-weight:400}
+.strip .dotpulse{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 9px var(--green);animation:blip 2s infinite}
+@keyframes blip{50%{opacity:.25}}
+
+/* ---------- left column ---------- */
+.col-l{grid-column:1;grid-row:2;display:flex;flex-direction:column;gap:14px;min-height:0}
+.col-l .panel.grow{flex:1;min-height:0;display:flex;flex-direction:column}
+.mrow{display:flex;align-items:center;gap:11px;padding:7px 0;font-size:9.5px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.mrow .mb{flex:1;height:2px;background:rgba(110,231,168,.14)}
+.mrow .mb i{display:block;height:100%;background:var(--green);box-shadow:0 0 7px rgba(110,231,168,.7);transition:width 1.2s ease}
+.mrow .mb.amb i{background:var(--amber);box-shadow:0 0 7px rgba(251,191,36,.7)}
+.mrow b{color:var(--ink);font-weight:400;width:40px;text-align:right;font-variant-numeric:tabular-nums}
+.log{margin-top:auto;border-top:1px solid var(--line);padding-top:10px;font-size:9px;line-height:2;color:var(--dim);letter-spacing:.1em}
+.log div span{color:rgba(110,231,168,.65);margin-right:8px}
+.chrono .big{font-family:var(--sans);font-weight:200;font-size:56px;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums;color:#fff}
+.chrono .big s{text-decoration:none;color:var(--green);font-size:24px;margin-left:5px}
+.chrono .sub{font-size:9.5px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase;margin-top:9px}
+.arcwrap{display:flex;align-items:center;gap:14px;margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.arcwrap svg{width:54px;height:54px;flex:0 0 54px}
+.arcwrap .lbl{font-size:9px;letter-spacing:.18em;color:var(--dim);line-height:1.9;text-transform:uppercase}
+.arcwrap .lbl b{color:var(--ink);font-weight:400}
+
+.origin-link{display:block;text-decoration:none;color:inherit;cursor:none}
+.origin-link .name{font-family:var(--sans);font-weight:300;font-size:22px;letter-spacing:-.01em;transition:color .3s}
+.origin-link:hover .name{color:var(--green)}
+.origin-link .go{font-size:9px;letter-spacing:.22em;color:var(--dim);margin-top:5px;text-transform:uppercase;display:flex;align-items:center;gap:6px;transition:.3s}
+.origin-link:hover .go{color:var(--green);gap:11px}
+
+/* ---------- centre viewport ---------- */
+.view{grid-column:2;grid-row:2;position:relative;display:grid;place-items:center}
+.frame{position:absolute;inset:34px;border:1px solid rgba(110,231,168,.12)}
+.frame span{position:absolute;background:var(--line2)}
+.frame span:nth-child(1){left:50%;top:-1px;width:1px;height:11px}
+.frame span:nth-child(2){left:50%;bottom:-1px;width:1px;height:11px}
+.frame span:nth-child(3){top:50%;left:-1px;height:1px;width:11px}
+.frame span:nth-child(4){top:50%;right:-1px;height:1px;width:11px}
+.ident{text-align:center;z-index:2}
+.ident .tag{font-size:9px;letter-spacing:.42em;color:var(--green);text-transform:uppercase;margin-bottom:20px}
+.ident h1{font-family:var(--sans);font-weight:200;font-size:clamp(38px,6vw,82px);letter-spacing:-.035em;line-height:1;color:#fff}
+.ident h1 b{font-weight:400}
+.ident .line{width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--line2),transparent);margin:22px auto}
+.ident p{font-size:10px;letter-spacing:.28em;color:var(--dim);text-transform:uppercase}
+.attitude{position:absolute;left:34px;right:34px;top:50%;height:1px;background:linear-gradient(90deg,transparent,rgba(110,231,168,.18) 20%,rgba(110,231,168,.18) 80%,transparent);z-index:1}
+
+/* ---------- right column ---------- */
+.col-r{grid-column:3;grid-row:2;display:flex;flex-direction:column;gap:14px;min-height:0}
+.navlist{display:flex;flex-direction:column}
+.navlist a{
+  display:flex;align-items:center;gap:12px;padding:9px 6px;text-decoration:none;color:var(--dim);
+  border-bottom:1px solid rgba(110,231,168,.07);font-size:12px;letter-spacing:.04em;cursor:none;transition:.26s;
+  font-family:var(--sans);font-weight:300;
+}
+.navlist a:last-child{border-bottom:0}
+.navlist a .n{font-family:var(--mono);font-size:9px;letter-spacing:.1em;opacity:.55}
+.navlist a .arr{margin-left:auto;font-family:var(--mono);font-size:11px;opacity:0;transform:translateX(-6px);transition:.26s}
+.navlist a:hover{color:var(--ink);background:linear-gradient(90deg,rgba(110,231,168,.07),transparent);padding-left:12px}
+.navlist a:hover .arr{opacity:1;transform:translateX(0);color:var(--green)}
+
+.tx{flex:1;display:flex;flex-direction:column;min-height:0}
+.wave{height:42px;width:100%;margin-bottom:10px;cursor:none}
+.txhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.txhead .t{font-family:var(--sans);font-size:15px;font-weight:300;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txhead .c{font-size:9px;color:var(--dim);letter-spacing:.14em;flex:0 0 auto;margin-left:10px}
+.txctrl{display:flex;align-items:center;gap:7px;padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.txctrl button{width:28px;height:28px;border:1px solid var(--line);background:transparent;color:var(--ink);display:grid;place-items:center;cursor:none;transition:.24s}
+.txctrl button:hover{border-color:var(--green);color:var(--green);background:rgba(110,231,168,.06)}
+.txctrl svg{width:11px;height:11px;fill:currentColor}
+.txctrl .tt{margin-left:auto;font-size:9.5px;color:var(--dim);letter-spacing:.1em;font-variant-numeric:tabular-nums}
+.txlist{overflow:auto;margin-top:6px;flex:1;min-height:0}
+.txlist::-webkit-scrollbar{width:3px}
+.txlist::-webkit-scrollbar-thumb{background:var(--line2)}
+.txlist button{
+  width:100%;display:flex;align-items:center;gap:10px;padding:7px 6px;border:0;background:transparent;
+  color:var(--dim);font-family:var(--mono);font-weight:300;font-size:10.5px;letter-spacing:.06em;text-align:left;cursor:none;transition:.2s;
+}
+.txlist button:hover{background:rgba(110,231,168,.06);color:var(--ink)}
+.txlist button.on{color:var(--green)}
+.txlist button .n{opacity:.5;width:18px;flex:0 0 18px}
+.txlist button .d{margin-left:auto;opacity:.5;font-size:9px}
+
+/* ---------- footer ---------- */
+.foot{grid-column:1/4;grid-row:3;display:flex;gap:14px;align-items:center;font-size:9px;letter-spacing:.22em;color:var(--dim);text-transform:uppercase;height:24px}
+.foot .sp{margin-left:auto}
+
+/* ---------- cursor ---------- */
+.cur-root{position:fixed;left:0;top:0;z-index:9999;pointer-events:none}
+.cur-root.is-out{opacity:0}
+.cur-dot{position:fixed;left:0;top:0;width:3px;height:3px;background:var(--green);box-shadow:0 0 8px var(--green)}
+.cur-ring{position:fixed;left:0;top:0;width:26px;height:26px;border:1px solid rgba(110,231,168,.55);border-radius:0;transition:width .26s,height .26s,border-color .26s}
+.cur-root.is-hover .cur-ring{width:44px;height:44px;border-color:var(--amber)}
+.cur-root.is-hover .cur-dot{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+.cur-root.is-down .cur-ring{width:14px;height:14px}
+.scan{position:fixed;z-index:9997;pointer-events:none;background:rgba(110,231,168,.13)}
+#scanX{left:0;right:0;height:1px}
+#scanY{top:0;bottom:0;width:1px}
+.readout{
+  position:fixed;z-index:9998;pointer-events:none;font-size:8.5px;letter-spacing:.14em;
+  color:var(--green);background:rgba(5,8,7,.8);border:1px solid rgba(110,231,168,.3);
+  padding:3px 7px;white-space:nowrap;transform:translate(18px,16px);
+}
+.badge{position:fixed;left:50%;bottom:5px;transform:translateX(-50%);z-index:40;font-size:8px;letter-spacing:.3em;color:rgba(95,115,112,.65)}
+</style>
+</head>
+<body>
+<canvas id="stars" class="layer"></canvas>
+<canvas id="spot" class="layer"></canvas>
+
+<div class="shell">
+  <!-- header -->
+  <div class="strip">
+    <div class="cell"><span class="dotpulse"></span> <b>ADDO//PORTFOLIO</b></div>
+    <div class="cell">SYS <b>NOMINAL</b></div>
+    <div class="cell">FEED <b id="feedTrk">IDLE</b></div>
+    <div class="cell">LAT <b>41.7701 N</b> &nbsp; LON <b>72.3051 W</b></div>
+    <div class="cell">UTC <b id="utc">--:--</b></div>
+  </div>
+
+  <!-- left -->
+  <div class="col-l">
+    <div class="panel chrono">
+      <h2>Chronometer <span class="id">C-01</span></h2>
+      <div class="big"><span id="hm">--:--</span><s id="ss">--</s></div>
+      <div class="sub" id="dstr">—</div>
+      <div class="arcwrap">
+        <svg viewBox="0 0 100 100">
+          <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(110,231,168,.14)" stroke-width="3"/>
+          <circle id="arc" cx="50" cy="50" r="42" fill="none" stroke="#6ee7a8" stroke-width="3"
+                  stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264"
+                  transform="rotate(-90 50 50)"/>
+        </svg>
+        <div class="lbl">
+          <div>Day elapsed <b id="dayPct">0%</b></div>
+          <div>Sunrise <b id="sunrise">--:--</b></div>
+          <div>Sunset <b id="sunset">--:--</b></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Origin <span class="id">O-01</span></h2>
+      <a href="#" class="origin-link" data-hover="COVENTRY">
+        <div class="name">Coventry, Connecticut</div>
+        <div class="go"><span>Open the record</span><span>→</span></div>
+      </a>
+      <div style="height:12px"></div>
+      <div class="row"><span>ZONE</span><b id="tz">EDT</b></div>
+      <div class="row"><span>ELEVATION</span><b>216 M</b></div>
+      <div class="row"><span>FOUNDED</span><b>1712</b></div>
+      <div class="row hl"><span>SIGNAL</span><b>HOME</b></div>
+    </div>
+
+    <div class="panel grow">
+      <h2>Systems <span class="id">S-01</span></h2>
+      <div class="mrow"><span style="width:56px">Signal</span><span class="mb"><i id="mSig" style="width:86%"></i></span><b>86%</b></div>
+      <div class="mrow"><span style="width:56px">Archive</span><span class="mb"><i id="mArc" style="width:42%"></i></span><b>42%</b></div>
+      <div class="mrow"><span style="width:56px">Payload</span><span class="mb amb"><i id="mPay" style="width:67%"></i></span><b>67%</b></div>
+      <div class="log" id="log">
+        <div><span>»</span>field stable</div>
+        <div><span>»</span>awaiting content payload</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- centre -->
+  <div class="view">
+    <div class="frame"><span></span><span></span><span></span><span></span></div>
+    <div class="attitude"></div>
+    <div class="ident">
+      <div class="tag">Deep field · observation</div>
+      <h1>Andrew <b>Addo</b></h1>
+      <div class="line"></div>
+      <p>Engineer &nbsp;·&nbsp; Producer &nbsp;·&nbsp; Coventry born</p>
+    </div>
+  </div>
+
+  <!-- right -->
+  <div class="col-r">
+    <div class="panel">
+      <h2>Navigation <span class="id">N-01</span></h2>
+      <div class="navlist">
+        <a href="#" data-hover="OPEN"><span class="n">01</span>About<span class="arr">→</span></a>
+        <a href="#" data-hover="OPEN"><span class="n">02</span>Work<span class="arr">→</span></a>
+        <a href="#" data-hover="OPEN"><span class="n">03</span>Sound<span class="arr">→</span></a>
+        <a href="#" data-hover="OPEN"><span class="n">04</span>Writing<span class="arr">→</span></a>
+        <a href="#" data-hover="OPEN"><span class="n">05</span>Contact<span class="arr">→</span></a>
+      </div>
+    </div>
+
+    <div class="panel tx">
+      <h2>Transmission <span class="id">T-05</span></h2>
+      <canvas class="wave" id="wave"></canvas>
+      <div class="txhead"><div class="t" id="trkTitle">—</div><div class="c" id="trkCode">TRX-01</div></div>
+      <div class="txctrl">
+        <button id="prev" data-hover="PREV"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6v12l-10-6z"/></svg></button>
+        <button id="toggle" data-hover="PLAY"><svg viewBox="0 0 24 24" id="ppIcon"><path d="M8 5v14l11-7z"/></svg></button>
+        <button id="next" data-hover="NEXT"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM4 6l10 6-10 6z"/></svg></button>
+        <span class="tt"><span id="tCur">0:00</span> / <span id="tDur">0:00</span></span>
+      </div>
+      <div class="txlist" id="txlist"></div>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>REV 0.1 — MOCKUP</span>
+    <span>·</span>
+    <span>CURSOR <b id="curXY" style="color:var(--ink);font-weight:400">0000 / 0000</b></span>
+    <span class="sp">CLICK ANYWHERE TO PING THE FIELD</span>
+  </div>
+</div>
+
+<div class="scan" id="scanX"></div>
+<div class="scan" id="scanY"></div>
+<div class="readout" id="readout">X 0000 · Y 0000</div>
+<div class="badge">MOCKUP 03 — TELEMETRY</div>
+
+<script src="assets/core.js"></script>
+<script src="assets/tracks.js"></script>
+<script>
+(function(){
+  var S = window.SpaceCore;
+
+  S.createStarfield(document.getElementById('stars'), {
+    parallax: 20,
+    drift: { x: -1.1, y: .25 },
+    layers: [
+      { count: 340, size:[.35,.8], depth:.2,  alpha:[.18,.45], color:'#ffffff' },
+      { count: 120, size:[.7,1.3], depth:.55, alpha:[.3,.7],   color:'#cfeee0' },
+      { count: 26,  size:[1.2,2.0],depth:1,   alpha:[.5,.95],  color:'#6ee7a8' }
+    ],
+    ripple: { speed: 700, width: 38, amplitude: 26, life: 1.6, ringColor: '110,231,168', ringAlpha: .2 }
+  });
+  S.createSpotlight(document.getElementById('spot'), { radius: 220, brightness: .07, color: '#6ee7a8', smoothing: .2 });
+  var cur = S.createCursor({ smoothing: .3, ringSmoothing: .16, magnet: false, ringRotate: false,
+                             hoverSelector: 'a,button,[data-hover],.wave' });
+
+  /* scanning crosshair + coordinate readout follow the smoothed cursor */
+  var sX=document.getElementById('scanX'), sY=document.getElementById('scanY'),
+      ro=document.getElementById('readout'), cxy=document.getElementById('curXY');
+  (function scan(){
+    var p = cur.pos();
+    sX.style.transform='translateY('+p.y+'px)';
+    sY.style.transform='translateX('+p.x+'px)';
+    ro.style.transform='translate('+(p.x+18)+'px,'+(p.y+16)+'px)';
+    var xs=String(Math.round(p.x)).padStart(4,'0'), ys=String(Math.round(p.y)).padStart(4,'0');
+    ro.textContent='X '+xs+' · Y '+ys;
+    cxy.textContent=xs+' / '+ys;
+    requestAnimationFrame(scan);
+  })();
+
+  /* ---- clock + approximate solar times for Coventry, CT ---- */
+  var LAT=41.7701, LON=-72.3051;
+  function solar(date){
+    // NOAA short form; good to a few minutes, fine for a readout
+    var start=new Date(date.getFullYear(),0,0);
+    var doy=Math.floor((date-start)/864e5);
+    var decl=0.4093*Math.sin(2*Math.PI*(doy-81)/365);
+    var latR=LAT*Math.PI/180;
+    var cosH=-Math.tan(latR)*Math.tan(decl);
+    if(cosH>1||cosH<-1) return null;               // polar day/night
+    var H=Math.acos(cosH)*180/Math.PI/15;          // half-day length, hours
+    var eot=9.87*Math.sin(4*Math.PI*(doy-81)/365)-7.53*Math.cos(2*Math.PI*(doy-81)/365)-1.5*Math.sin(2*Math.PI*(doy-81)/365);
+    var solarNoonUTC=12-LON/15-eot/60;
+    return { riseUTC:solarNoonUTC-H, setUTC:solarNoonUTC+H };
+  }
+  function utcHoursToLocal(h, offsetHours){
+    var v=(h+offsetHours+24)%24;
+    var hh=Math.floor(v), mm=Math.round((v-hh)*60);
+    if(mm===60){hh=(hh+1)%24;mm=0;}
+    return String(hh).padStart(2,'0')+':'+String(mm).padStart(2,'0');
+  }
+  var arc=document.getElementById('arc'), CIRC=2*Math.PI*42;
+
+  S.createClock('America/New_York', function(c){
+    document.getElementById('hm').textContent=c.hour+':'+c.minute;
+    document.getElementById('ss').textContent=c.second;
+    document.getElementById('dstr').textContent=c.weekdayLong+' · '+c.monthLong+' '+Number(c.day)+' · '+c.year;
+    document.getElementById('tz').textContent=c.timeZoneName;
+    document.getElementById('utc').textContent=new Date().toISOString().slice(11,19);
+    document.getElementById('dayPct').textContent=(c.dayFraction*100).toFixed(1)+'%';
+    arc.setAttribute('stroke-dashoffset', CIRC*(1-c.dayFraction));
+    // offset between the Coventry wall clock and UTC, derived not hardcoded
+    var utcH=new Date().getUTCHours()+new Date().getUTCMinutes()/60;
+    var locH=Number(c.hour)+Number(c.minute)/60;
+    var off=Math.round(locH-utcH);
+    if(off>12)off-=24; if(off<-12)off+=24;
+    var s=solar(new Date());
+    if(s){
+      document.getElementById('sunrise').textContent=utcHoursToLocal(s.riseUTC,off);
+      document.getElementById('sunset').textContent=utcHoursToLocal(s.setUTC,off);
+    }
+  },250);
+
+  /* ---- systems panel: gentle drift so the readouts feel live ---- */
+  ['mSig','mArc','mPay'].forEach(function(id, i){
+    var base=[86,42,67][i], node=document.getElementById(id), out=node.parentElement.nextElementSibling;
+    setInterval(function(){
+      var v=Math.max(4,Math.min(99, base + (Math.random()*6-3)));
+      node.style.width=v.toFixed(0)+'%'; out.textContent=v.toFixed(0)+'%';
+    }, 2600 + i*900);
+  });
+  var LOGS=['field stable','awaiting content payload','five transmissions cached',
+            'chronometer synced · america/new_york','parallax within tolerance','origin record locked'];
+  var li=2, logEl=document.getElementById('log');
+  setInterval(function(){
+    var d=document.createElement('div');
+    d.innerHTML='<span>»</span>'+LOGS[li++ % LOGS.length];
+    logEl.appendChild(d);
+    while(logEl.children.length>4) logEl.removeChild(logEl.firstChild);
+  }, 5200);
+
+  /* ---- player ---- */
+  var PLAY='M8 5v14l11-7z', PAUSE='M6 5h4v14H6zM14 5h4v14h-4z';
+  var el={title:document.getElementById('trkTitle'),code:document.getElementById('trkCode'),
+          cur:document.getElementById('tCur'),dur:document.getElementById('tDur'),
+          icon:document.getElementById('ppIcon'),list:document.getElementById('txlist'),
+          feed:document.getElementById('feedTrk')};
+  var st={progress:0,playing:false};
+
+  var player=S.createPlayer(window.TRACKS,{onState:function(s){
+    el.title.textContent=s.track.title;
+    el.code.textContent=s.track.code;
+    el.cur.textContent=S.fmtTime(s.current);
+    el.dur.textContent=S.fmtTime(s.duration);
+    el.icon.firstElementChild.setAttribute('d',s.playing?PAUSE:PLAY);
+    el.feed.textContent=s.playing?s.track.code:'IDLE';
+    st.progress=s.duration?s.current/s.duration:0;
+    st.playing=s.playing;
+    Array.prototype.forEach.call(el.list.children,function(b,i){b.classList.toggle('on',i===s.index);});
+  }});
+
+  window.TRACKS.forEach(function(t,i){
+    var b=document.createElement('button');
+    b.dataset.hover='CUE';
+    b.innerHTML='<span class="n">'+String(i+1).padStart(2,'0')+'</span><span>'+t.title+'</span><span class="d">'+t.code+'</span>';
+    b.onclick=function(){player.select(i);};
+    el.list.appendChild(b);
+  });
+  document.getElementById('toggle').onclick=function(){player.toggle();};
+  document.getElementById('next').onclick=function(){player.next();};
+  document.getElementById('prev').onclick=function(){player.prev();};
+
+  /* ---- waveform scrubber: static shape, live playhead, live spectrum overlay ---- */
+  var wc=document.getElementById('wave'), wx=wc.getContext('2d');
+  var dpr=Math.min(window.devicePixelRatio||1,2);
+  var BARS=72, shape=[];
+  for(var i=0;i<BARS;i++) shape.push(0.18+Math.abs(Math.sin(i*0.63))*0.5+Math.random()*0.3);
+  function sizeWave(){wc.width=wc.clientWidth*dpr;wc.height=wc.clientHeight*dpr;wx.setTransform(dpr,0,0,dpr,0,0);}
+  window.addEventListener('resize',sizeWave); setTimeout(sizeWave,0);
+  wc.onclick=function(e){var r=wc.getBoundingClientRect();player.seek((e.clientX-r.left)/r.width);};
+  (function wave(now){
+    var W=wc.clientWidth,H=wc.clientHeight;
+    wx.clearRect(0,0,W,H);
+    var data=player.spectrum();
+    var bw=W/BARS;
+    for(var i=0;i<BARS;i++){
+      var played=(i/BARS)<st.progress;
+      var v=shape[i];
+      if(data&&st.playing) v=v*0.4+(data[Math.floor(Math.pow(i/(BARS-1),1.9)*(data.length-1))]/255)*0.9;
+      var h=Math.max(1.5,v*H*0.9);
+      wx.fillStyle=played?'rgba(110,231,168,.85)':'rgba(110,231,168,.2)';
+      wx.fillRect(i*bw, H/2-h/2, Math.max(1,bw-1.6), h);
+    }
+    // playhead
+    wx.fillStyle='rgba(251,191,36,.9)';
+    wx.fillRect(st.progress*W-0.5,0,1,H);
+    requestAnimationFrame(wave);
+  })(0);
+
+  document.addEventListener('keydown',function(e){
+    if(e.code==='Space'){e.preventDefault();player.toggle();}
+    if(e.code==='ArrowRight')player.next();
+    if(e.code==='ArrowLeft')player.prev();
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Portfolio mockups — pick a direction</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400&family=IBM+Plex+Sans:wght@200;300&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#05070a;color:#dde5ef;font-family:'IBM Plex Mono',monospace;font-weight:300;min-height:100vh;display:grid;place-items:center;padding:60px 24px}
+.wrap{width:min(1000px,100%)}
+h1{font-family:'IBM Plex Sans',sans-serif;font-weight:200;font-size:40px;letter-spacing:-.03em;margin-bottom:8px}
+.sub{font-size:11px;letter-spacing:.24em;color:#65748a;text-transform:uppercase;margin-bottom:48px}
+.grid{display:grid;gap:14px}
+a.card{
+  display:grid;grid-template-columns:70px 1fr auto;gap:22px;align-items:center;
+  padding:26px 28px;border:1px solid rgba(160,190,230,.16);text-decoration:none;color:inherit;transition:.3s;
+}
+a.card:hover{border-color:rgba(125,227,255,.5);background:rgba(125,227,255,.04);transform:translateX(5px)}
+.n{font-size:28px;font-weight:200;color:#3f4c60;font-family:'IBM Plex Sans',sans-serif}
+.t{font-family:'IBM Plex Sans',sans-serif;font-size:22px;font-weight:300;letter-spacing:-.01em}
+.d{font-size:11px;color:#65748a;margin-top:6px;line-height:1.7;letter-spacing:.02em}
+.go{font-size:11px;letter-spacing:.2em;color:#7de3ff;opacity:0;transition:.3s}
+a.card:hover .go{opacity:1}
+.note{margin-top:40px;font-size:11px;color:#4e5b70;line-height:2;letter-spacing:.04em}
+kbd{border:1px solid rgba(160,190,230,.22);padding:1px 6px;font-size:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Portfolio — three directions</h1>
+  <div class="sub">Outer space · Coventry, CT · live clock · five tracks</div>
+  <div class="grid">
+    <a class="card" href="01-observation-deck.html">
+      <span class="n">01</span>
+      <span><span class="t">Observation Deck</span>
+        <div class="d">Ship-HUD read. Floating glass pills, corner brackets, big centred name, right-rail nav, full cassette player. Crosshair reticle cursor. Cyan + amber on near-black.</div></span>
+      <span class="go">ENTER →</span>
+    </a>
+    <a class="card" href="02-orbit.html">
+      <span class="n">02</span>
+      <span><span class="t">Orbit</span>
+        <div class="d">The abstract one. Nav sections are planets orbiting your name in a tilted orrery; nebula wash behind the stars. Comet-tail cursor. Serif + violet/gold.</div></span>
+      <span class="go">ENTER →</span>
+    </a>
+    <a class="card" href="03-telemetry.html">
+      <span class="n">03</span>
+      <span><span class="t">Telemetry</span>
+        <div class="d">Flight-computer panels: chronometer with day arc and real sun times, origin record, navigation list, waveform transmission deck. Full-screen scanning crosshair with live coordinates. Phosphor green.</div></span>
+      <span class="go">ENTER →</span>
+    </a>
+  </div>
+  <div class="note">
+    All three: live Coventry, CT time · click anywhere to ripple the starfield · <kbd>space</kbd> play/pause · <kbd>←</kbd> <kbd>→</kbd> track skip.
+  </div>
+</div>
+</body>
+</html>

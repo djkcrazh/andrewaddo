@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mockup 02 — Orbit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#04050a;
+  --ink:#f2efe9;
+  --dim:#7a7f92;
+  --line:rgba(190,185,255,.14);
+  --violet:#a78bfa;
+  --teal:#5eead4;
+  --gold:#f5d78e;
+  --serif:'Instrument Serif',Georgia,serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--void);color:var(--ink);font-family:var(--mono);overflow:hidden;cursor:none;-webkit-font-smoothing:antialiased}
+
+/* nebula wash behind the stars */
+.nebula{position:fixed;inset:-20%;z-index:0;pointer-events:none;filter:blur(70px);opacity:.5}
+.nebula i{position:absolute;border-radius:50%;display:block}
+.nebula i:nth-child(1){width:52vw;height:52vw;left:2%;top:6%;background:radial-gradient(circle,rgba(124,58,237,.34),transparent 62%);animation:drift1 46s ease-in-out infinite alternate}
+.nebula i:nth-child(2){width:46vw;height:46vw;right:4%;bottom:2%;background:radial-gradient(circle,rgba(20,184,166,.26),transparent 62%);animation:drift2 58s ease-in-out infinite alternate}
+.nebula i:nth-child(3){width:34vw;height:34vw;left:44%;top:40%;background:radial-gradient(circle,rgba(244,114,182,.14),transparent 64%);animation:drift1 72s ease-in-out infinite alternate-reverse}
+@keyframes drift1{to{transform:translate(7vw,-5vh) scale(1.14)}}
+@keyframes drift2{to{transform:translate(-6vw,4vh) scale(1.1)}}
+
+canvas.layer{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#stars{z-index:1}
+#spot{z-index:2}
+.cur-trail{position:fixed;inset:0;z-index:9998;pointer-events:none;mix-blend-mode:screen}
+body::after{content:'';position:fixed;inset:0;pointer-events:none;z-index:50;background:radial-gradient(120% 90% at 50% 50%,transparent 40%,rgba(0,0,0,.72))}
+
+/* ---------- orbit system ---------- */
+.system{position:fixed;inset:0;z-index:6;display:grid;place-items:center}
+.orrery{position:relative;width:min(84vh,980px);height:min(84vh,980px)}
+.orrery svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.orrery svg ellipse{fill:none;stroke:rgba(190,185,255,.2);stroke-width:1;transition:stroke .4s}
+.orrery svg ellipse.hot{stroke:rgba(167,139,250,.55)}
+
+.core{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;pointer-events:none}
+.core .halo{position:absolute;left:50%;top:50%;width:300px;height:300px;transform:translate(-50%,-50%);
+  border-radius:50%;background:radial-gradient(circle,rgba(245,215,142,.22),rgba(167,139,250,.07) 40%,transparent 70%);
+  animation:breathe 7s ease-in-out infinite}
+@keyframes breathe{50%{transform:translate(-50%,-50%) scale(1.16);opacity:.7}}
+.core .star{position:absolute;left:50%;top:50%;width:14px;height:14px;transform:translate(-50%,-50%);
+  border-radius:50%;background:#fff;box-shadow:0 0 22px #f5d78e,0 0 60px rgba(245,215,142,.6)}
+.core .flare{position:absolute;left:50%;top:50%;background:linear-gradient(90deg,transparent,rgba(245,215,142,.55),transparent)}
+.core .flare.h{width:190px;height:1px;transform:translate(-50%,-50%)}
+.core .flare.v{width:1px;height:190px;transform:translate(-50%,-50%);background:linear-gradient(transparent,rgba(245,215,142,.45),transparent)}
+
+.body{
+  position:absolute;left:0;top:0;width:0;height:0;z-index:4;
+}
+.body .hit{
+  position:absolute;left:0;top:0;transform:translate(-50%,-50%);
+  width:76px;height:76px;border-radius:50%;display:grid;place-items:center;cursor:none;
+  text-decoration:none;color:inherit;
+}
+.body .orb{
+  width:13px;height:13px;border-radius:50%;background:var(--ink);
+  box-shadow:0 0 16px rgba(242,239,233,.55);transition:.35s cubic-bezier(.2,.8,.2,1);
+}
+.body .ring{
+  position:absolute;width:38px;height:38px;border-radius:50%;border:1px solid rgba(167,139,250,.0);
+  transition:.4s cubic-bezier(.2,.8,.2,1);
+}
+.body .lab{
+  position:absolute;top:calc(50% + 26px);left:50%;transform:translate(-50%,6px);
+  font-family:var(--serif);font-size:21px;letter-spacing:.01em;white-space:nowrap;
+  opacity:.4;transition:.38s cubic-bezier(.2,.8,.2,1);text-shadow:0 2px 18px rgba(4,5,10,.9);
+}
+.body .meta{
+  position:absolute;top:calc(50% + 52px);left:50%;transform:translate(-50%,4px);
+  font-size:8px;letter-spacing:.24em;color:var(--dim);white-space:nowrap;opacity:0;transition:.38s;
+}
+.body .hit:hover .orb{background:var(--gold);box-shadow:0 0 28px var(--gold);transform:scale(1.45)}
+.body .hit:hover .ring{width:54px;height:54px;border-color:rgba(245,215,142,.5)}
+.body .hit:hover .lab{opacity:1;transform:translate(-50%,0)}
+.body .hit:hover .meta{opacity:.85;transform:translate(-50%,0)}
+
+/* ---------- corners ---------- */
+.place{position:fixed;left:54px;top:46px;z-index:20}
+.place a{
+  font-family:var(--serif);font-size:25px;color:var(--ink);text-decoration:none;cursor:none;position:relative;display:inline-block;
+}
+.place a::after{content:'';position:absolute;left:0;bottom:-3px;height:1px;width:100%;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.place a:hover::after{transform:scaleX(1)}
+.place .co{font-size:9px;letter-spacing:.26em;color:var(--dim);margin-top:9px;text-transform:uppercase}
+
+.ident{position:fixed;left:54px;bottom:112px;z-index:20}
+.ident h1{font-family:var(--serif);font-weight:400;font-size:clamp(40px,5.4vw,72px);line-height:.92;letter-spacing:-.015em}
+.ident h1 em{font-style:italic;color:var(--gold)}
+.ident .sub{font-size:9px;letter-spacing:.34em;color:var(--dim);text-transform:uppercase;margin-top:16px}
+
+.chrono{position:fixed;right:54px;top:40px;z-index:20;text-align:right}
+.chrono .t{font-family:var(--serif);font-size:58px;line-height:1;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.chrono .t s{text-decoration:none;color:var(--dim);font-size:30px;vertical-align:baseline;margin-left:6px}
+.chrono .d{font-size:9px;letter-spacing:.26em;color:var(--dim);margin-top:9px;text-transform:uppercase}
+
+.status{position:fixed;right:54px;bottom:112px;z-index:20;text-align:right;font-size:9px;letter-spacing:.22em;color:var(--dim);line-height:2.1;text-transform:uppercase}
+.status b{color:var(--ink);font-weight:400}
+
+/* ---------- dock player ---------- */
+.dock{
+  position:fixed;left:0;right:0;bottom:0;z-index:24;height:78px;
+  display:flex;align-items:center;gap:26px;padding:0 54px;
+  border-top:1px solid var(--line);background:linear-gradient(transparent,rgba(4,5,10,.82) 40%);
+  backdrop-filter:blur(10px);
+}
+.dock .ctrls{display:flex;gap:4px;align-items:center}
+.dock .ctrls button{width:30px;height:30px;border:0;background:transparent;color:var(--dim);display:grid;place-items:center;cursor:none;transition:.24s}
+.dock .ctrls button:hover{color:var(--gold)}
+.dock .ctrls button.main{color:var(--ink);width:38px;height:38px;border:1px solid var(--line);border-radius:50%}
+.dock .ctrls button.main:hover{border-color:var(--gold)}
+.dock .ctrls svg{width:12px;height:12px;fill:currentColor}
+.dock .now{min-width:230px}
+.dock .now .t{font-family:var(--serif);font-style:italic;font-size:22px;line-height:1.1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dock .now .s{font-size:8px;letter-spacing:.24em;color:var(--dim);margin-top:3px}
+#spectrum{flex:1;height:38px;opacity:.9}
+.dock .time{font-size:10px;color:var(--dim);letter-spacing:.1em;font-variant-numeric:tabular-nums;min-width:86px;text-align:right}
+.dock .list{display:flex;gap:3px;align-items:center}
+.dock .list button{
+  width:26px;height:26px;border:1px solid transparent;border-radius:50%;background:transparent;
+  color:var(--dim);font-size:9px;cursor:none;transition:.24s;font-family:var(--mono)
+}
+.dock .list button:hover{color:var(--ink);border-color:var(--line)}
+.dock .list button.on{color:var(--gold);border-color:rgba(245,215,142,.45)}
+
+.seek{position:fixed;left:0;right:0;bottom:78px;height:1px;background:rgba(255,255,255,.08);z-index:25;cursor:none}
+.seek .fill{height:100%;width:0;background:linear-gradient(90deg,var(--violet),var(--gold));box-shadow:0 0 12px rgba(245,215,142,.5)}
+.seek::before{content:'';position:absolute;inset:-8px 0;cursor:none}
+
+/* ---------- cursor ---------- */
+.cur-root{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;mix-blend-mode:screen}
+.cur-root.is-out{opacity:0}
+.cur-dot{position:fixed;left:0;top:0;width:7px;height:7px;border-radius:50%;background:#fff;
+  box-shadow:0 0 12px rgba(255,255,255,.9),0 0 34px rgba(167,139,250,.75);transition:width .3s,height .3s}
+.cur-ring{position:fixed;left:0;top:0;width:44px;height:44px;border-radius:50%;
+  background:radial-gradient(circle,rgba(167,139,250,.16),transparent 66%);transition:width .4s,height .4s,background .4s}
+.cur-root.is-hover .cur-ring{width:84px;height:84px;background:radial-gradient(circle,rgba(245,215,142,.2),transparent 66%)}
+.cur-root.is-hover .cur-dot{width:4px;height:4px}
+.cur-root.is-down .cur-ring{width:24px;height:24px}
+
+.badge{position:fixed;left:54px;bottom:92px;z-index:40;font-size:8px;letter-spacing:.3em;color:rgba(122,127,146,.6)}
+</style>
+</head>
+<body>
+<div class="nebula"><i></i><i></i><i></i></div>
+<canvas id="stars" class="layer"></canvas>
+<canvas id="spot" class="layer"></canvas>
+
+<div class="place">
+  <a href="#" data-hover="ORIGIN">Coventry, Connecticut</a>
+  <div class="co">41.7701° N · 72.3051° W · <span id="tz">EDT</span></div>
+</div>
+
+<div class="status">
+  <div>Deep field <b>OPEN</b></div>
+  <div>Carrier <b>LOCKED</b></div>
+  <div>Drift <b id="drift">0.000</b></div>
+</div>
+
+<div class="chrono">
+  <div class="t"><span id="hm">--:--</span><s id="ss">--</s></div>
+  <div class="d" id="dstr">—</div>
+</div>
+
+<div class="ident">
+  <h1>Andrew<br><em>Addo</em></h1>
+  <div class="sub">Portfolio · MMXXVI</div>
+</div>
+
+<div class="system">
+  <div class="orrery" id="orrery">
+    <svg viewBox="-500 -500 1000 1000" id="rings"></svg>
+    <div class="core">
+      <div class="halo"></div>
+      <div class="flare h"></div>
+      <div class="flare v"></div>
+      <div class="star"></div>
+    </div>
+  </div>
+</div>
+
+<div class="seek" id="seek"><div class="fill" id="seekFill"></div></div>
+<div class="dock">
+  <div class="ctrls">
+    <button id="prev" data-hover="PREV"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6v12l-10-6z"/></svg></button>
+    <button id="toggle" class="main" data-hover="PLAY"><svg viewBox="0 0 24 24" id="ppIcon"><path d="M8 5v14l11-7z"/></svg></button>
+    <button id="next" data-hover="NEXT"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM4 6l10 6-10 6z"/></svg></button>
+  </div>
+  <div class="now">
+    <div class="t" id="trkTitle">Select a transmission</div>
+    <div class="s" id="trkSub">FIVE TRACKS · ANDREW ADDO</div>
+  </div>
+  <canvas id="spectrum"></canvas>
+  <div class="time"><span id="tCur">0:00</span> / <span id="tDur">0:00</span></div>
+  <div class="list" id="list"></div>
+</div>
+
+<div class="badge">MOCKUP 02 — ORBIT</div>
+
+<script src="assets/core.js"></script>
+<script src="assets/tracks.js"></script>
+<script>
+(function(){
+  var S = window.SpaceCore;
+
+  S.createStarfield(document.getElementById('stars'), {
+    parallax: 40,
+    drift: { x: -1.4, y: .3 },
+    layers: [
+      { count: 300, size:[.4,.9],  depth:.2, alpha:[.2,.5],  color:'#ffffff' },
+      { count: 130, size:[.8,1.5], depth:.55,alpha:[.35,.8], color:'#e9e4ff' },
+      { count: 40,  size:[1.3,2.3],depth:1,  alpha:[.55,1],  color:'#f5d78e' }
+    ],
+    ripple: { speed: 560, width: 58, amplitude: 44, life: 2.4, ringColor: '167,139,250', ringAlpha: .16 }
+  });
+  S.createSpotlight(document.getElementById('spot'), { radius: 340, brightness: .08, color: '#a78bfa', smoothing: .1 });
+  S.createCursor({ smoothing: .16, ringSmoothing: .08, trail: 26, trailColor: '167,139,250',
+                   hoverSelector: 'a,button,[data-hover],.seek' });
+
+  /* ---- orrery ---- */
+  var BODIES = [
+    { name:'About',   meta:'WHO / WHERE FROM',  r:252, speed:.020, a0:0.4  },
+    { name:'Work',    meta:'BUILT THINGS',      r:312, speed:.014, a0:2.1  },
+    { name:'Sound',   meta:'FIVE TRANSMISSIONS',r:372, speed:.010, a0:3.7  },
+    { name:'Writing', meta:'NOTES & LOGS',      r:430, speed:.0072,a0:5.2  },
+    { name:'Contact', meta:'OPEN CHANNEL',      r:486, speed:.0055,a0:0.9  }
+  ];
+  var TILT = .36;
+  var orrery = document.getElementById('orrery');
+  var svg = document.getElementById('rings');
+  var els = [];
+
+  BODIES.forEach(function(b, i){
+    var e = document.createElementNS('http://www.w3.org/2000/svg','ellipse');
+    e.setAttribute('cx',0); e.setAttribute('cy',0);
+    e.setAttribute('rx',b.r); e.setAttribute('ry',b.r*TILT);
+    svg.appendChild(e);
+
+    var wrap = document.createElement('div');
+    wrap.className = 'body';
+    wrap.innerHTML = '<a class="hit" href="#" data-hover="' + b.name.toUpperCase() + '">' +
+        '<span class="ring"></span><span class="orb"></span>' +
+        '<span class="lab">' + b.name + '</span>' +
+        '<span class="meta">' + b.meta + '</span></a>';
+    orrery.appendChild(wrap);
+
+    var hit = wrap.querySelector('.hit');
+    hit.addEventListener('mouseenter', function(){ e.classList.add('hot'); });
+    hit.addEventListener('mouseleave', function(){ e.classList.remove('hot'); });
+    els.push({ cfg:b, wrap:wrap, hit:hit, orb:wrap.querySelector('.orb') });
+  });
+
+  var t0 = performance.now();
+  (function orbit(now){
+    var t = (now - t0) / 1000;
+    var box = orrery.getBoundingClientRect();
+    var scale = box.width / 1000;   // svg viewBox is 1000 wide
+    els.forEach(function(o){
+      var a = o.cfg.a0 + t * o.cfg.speed;
+      var x = Math.cos(a) * o.cfg.r * scale;
+      var y = Math.sin(a) * o.cfg.r * TILT * scale;
+      // bodies on the far side of the ellipse read as further away
+      var depth = (Math.sin(a) + 1) / 2;             // 0 = behind, 1 = in front
+      var s = 0.72 + depth * 0.46;
+      o.wrap.style.transform = 'translate(' + (box.width/2 + x) + 'px,' + (box.height/2 + y) + 'px)';
+      o.wrap.style.zIndex = Math.round(depth * 10) + 2;
+      o.orb.style.opacity = (0.45 + depth * 0.55).toFixed(2);
+      o.hit.style.transform = 'translate(-50%,-50%) scale(' + s.toFixed(3) + ')';
+    });
+    requestAnimationFrame(orbit);
+  })(t0);
+
+  /* ---- clock ---- */
+  S.createClock('America/New_York', function(c){
+    document.getElementById('hm').textContent = c.hour + ':' + c.minute;
+    document.getElementById('ss').textContent = c.second;
+    document.getElementById('dstr').textContent = c.weekdayLong + ', ' + c.monthLong + ' ' + Number(c.day) + ', ' + c.year;
+    document.getElementById('tz').textContent = c.timeZoneName;
+    document.getElementById('drift').textContent = (c.dayFraction * 360).toFixed(3);
+  }, 250);
+
+  /* ---- player ---- */
+  var PLAY='M8 5v14l11-7z', PAUSE='M6 5h4v14H6zM14 5h4v14h-4z';
+  var el = {
+    title:document.getElementById('trkTitle'), sub:document.getElementById('trkSub'),
+    cur:document.getElementById('tCur'), dur:document.getElementById('tDur'),
+    fill:document.getElementById('seekFill'), icon:document.getElementById('ppIcon'),
+    list:document.getElementById('list')
+  };
+  var playing = false;
+
+  var player = S.createPlayer(window.TRACKS, { onState:function(s){
+    el.title.textContent = s.track.title;
+    el.sub.textContent = s.track.code + ' · ' + (s.playing ? 'TRANSMITTING' : 'HELD');
+    el.cur.textContent = S.fmtTime(s.current);
+    el.dur.textContent = S.fmtTime(s.duration);
+    el.fill.style.width = (s.duration ? s.current/s.duration*100 : 0) + '%';
+    el.icon.firstElementChild.setAttribute('d', s.playing ? PAUSE : PLAY);
+    playing = s.playing;
+    Array.prototype.forEach.call(el.list.children, function(b,i){ b.classList.toggle('on', i===s.index); });
+  }});
+
+  window.TRACKS.forEach(function(t,i){
+    var b = document.createElement('button');
+    b.textContent = String(i+1); b.title = t.title; b.dataset.hover = t.title.toUpperCase();
+    b.onclick = function(){ player.select(i); };
+    el.list.appendChild(b);
+  });
+  document.getElementById('toggle').onclick=function(){player.toggle();};
+  document.getElementById('next').onclick=function(){player.next();};
+  document.getElementById('prev').onclick=function(){player.prev();};
+  var seek=document.getElementById('seek');
+  seek.onclick=function(e){ player.seek(e.clientX/window.innerWidth); };
+
+  /* ---- spectrum ---- */
+  var sc = document.getElementById('spectrum'), sx = sc.getContext('2d');
+  var dpr = Math.min(window.devicePixelRatio||1,2);
+  function sizeSpec(){ sc.width=sc.clientWidth*dpr; sc.height=sc.clientHeight*dpr; sx.setTransform(dpr,0,0,dpr,0,0); }
+  window.addEventListener('resize', sizeSpec); setTimeout(sizeSpec,0);
+  (function spec(now){
+    var W=sc.clientWidth,H=sc.clientHeight;
+    sx.clearRect(0,0,W,H);
+    var data = player.spectrum();
+    var N = 56, gap = 3, bw = Math.max(1,(W-(N-1)*gap)/N);
+    for(var i=0;i<N;i++){
+      var v;
+      if (data && playing){
+        // squashed index: bass gets more bars, treble fewer — reads fuller
+        v = data[Math.floor(Math.pow(i/(N-1),1.9)*(data.length-1))]/255;
+      }
+      else { v = 0.09 + 0.34*Math.pow(Math.sin(now/1300 + i*0.26),2) * (0.3 + 0.7*Math.pow(Math.sin(now/3100 + i*0.08),2)); }
+      var h = Math.max(1.5, v*H*0.94);
+      var g = sx.createLinearGradient(0,H/2-h/2,0,H/2+h/2);
+      g.addColorStop(0,'rgba(245,215,142,'+(0.25+v*0.6)+')');
+      g.addColorStop(1,'rgba(167,139,250,'+(0.18+v*0.5)+')');
+      sx.fillStyle=g;
+      sx.fillRect(i*(bw+gap), H/2-h/2, bw, h);
+    }
+    requestAnimationFrame(spec);
+  })(0);
+
+  document.addEventListener('keydown',function(e){
+    if(e.code==='Space'){e.preventDefault();player.toggle();}
+    if(e.code==='ArrowRight')player.next();
+    if(e.code==='ArrowLeft')player.prev();
+  });
+})();
+</script>
+</body>
+</html>

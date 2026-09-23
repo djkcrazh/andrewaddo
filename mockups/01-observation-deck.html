@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mockup 01 — Observation Deck</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --void:#05070c;
+  --ink:#e8eef7;
+  --dim:#6c7a90;
+  --line:rgba(150,180,220,.16);
+  --glass:rgba(10,16,26,.5);
+  --cyan:#7de3ff;
+  --amber:#ffc46b;
+  --ui:'Space Grotesk',system-ui,sans-serif;
+  --mono:'Space Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--void); color:var(--ink); font-family:var(--ui);
+  overflow:hidden; cursor:none;
+  -webkit-font-smoothing:antialiased;
+}
+body::after{ /* faint scanline + vignette so the glass feels like a screen */
+  content:''; position:fixed; inset:0; pointer-events:none; z-index:60;
+  background:
+    repeating-linear-gradient(to bottom, rgba(255,255,255,.012) 0 1px, transparent 1px 3px),
+    radial-gradient(130% 100% at 50% 50%, transparent 45%, rgba(0,0,0,.65) 100%);
+}
+canvas.layer{position:fixed;inset:0;width:100%;height:100%;pointer-events:none}
+#stars{z-index:0}
+#spot{z-index:1}
+
+/* ---------- HUD chrome ---------- */
+.hud{position:fixed;inset:0;z-index:10;pointer-events:none}
+.hud > *{pointer-events:auto}
+.corner{position:fixed;width:34px;height:34px;border:1px solid var(--line);z-index:10}
+.corner.tl{top:18px;left:18px;border-right:0;border-bottom:0}
+.corner.tr{top:18px;right:18px;border-left:0;border-bottom:0}
+.corner.bl{bottom:18px;left:18px;border-right:0;border-top:0}
+.corner.br{bottom:18px;right:18px;border-left:0;border-top:0}
+
+.pill{
+  display:inline-flex;align-items:center;gap:10px;
+  padding:9px 16px;border:1px solid var(--line);border-radius:999px;
+  background:var(--glass);backdrop-filter:blur(8px);
+  font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  color:inherit;text-decoration:none;
+  transition:border-color .3s, background .3s, color .3s;
+}
+.pill .sep{width:1px;height:12px;background:var(--line)}
+.pill .dim{color:var(--dim)}
+
+.topbar{position:fixed;top:34px;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:0 72px;z-index:12}
+#clockTime{color:var(--ink);font-size:13px;letter-spacing:.18em}
+#clockTime .ms{color:var(--dim);font-size:10px}
+
+.origin{cursor:none;position:relative}
+.origin:hover{border-color:rgba(125,227,255,.5);color:var(--cyan)}
+.origin .dot{width:5px;height:5px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
+.origin::after{
+  content:'↗ upbringing';position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%) translateY(-4px);
+  font-size:9px;letter-spacing:.2em;color:var(--dim);opacity:0;transition:.3s;white-space:nowrap;
+}
+.origin:hover::after{opacity:1;transform:translateX(-50%) translateY(0)}
+
+.meters{display:flex;gap:10px;align-items:center}
+.meter{display:flex;align-items:center;gap:7px;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--dim)}
+.bar{width:44px;height:3px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--cyan);box-shadow:0 0 8px var(--cyan)}
+.bar.amber i{background:var(--amber);box-shadow:0 0 8px var(--amber)}
+
+/* ---------- centre identity ---------- */
+.stage{position:fixed;inset:0;display:grid;place-items:center;z-index:8;pointer-events:none}
+.ident{text-align:center;transform:translateY(-4vh)}
+.ident .eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.42em;color:var(--dim);margin-bottom:22px}
+.ident h1{
+  font-size:clamp(44px,8.4vw,116px);font-weight:300;letter-spacing:-.03em;line-height:.92;
+  text-shadow:0 0 60px rgba(125,227,255,.22);
+}
+.ident h1 em{font-style:normal;font-weight:700}
+.ident .rule{width:1px;height:46px;margin:28px auto 22px;background:linear-gradient(var(--line),transparent)}
+.ident p{font-family:var(--mono);font-size:11px;letter-spacing:.26em;color:var(--dim);text-transform:uppercase}
+
+/* ---------- right nav ---------- */
+.nav{position:fixed;right:72px;top:34%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2px;z-index:12}
+.nav a{
+  display:flex;align-items:center;gap:14px;padding:11px 14px 11px 12px;
+  text-decoration:none;color:var(--dim);border-right:1px solid transparent;
+  font-size:14px;letter-spacing:.05em;transition:.3s cubic-bezier(.2,.8,.2,1);cursor:none;
+}
+.nav a .idx{font-family:var(--mono);font-size:9px;letter-spacing:.1em;opacity:.6;width:18px}
+.nav a .name{transform:translateX(0);transition:.35s cubic-bezier(.2,.8,.2,1)}
+.nav a:hover{color:var(--ink);border-right-color:var(--cyan);background:linear-gradient(90deg,transparent,rgba(125,227,255,.06))}
+.nav a:hover .name{transform:translateX(-6px)}
+.nav a:hover .idx{color:var(--cyan);opacity:1}
+
+/* ---------- bottom-left telemetry ---------- */
+.telemetry{position:fixed;left:72px;bottom:42px;z-index:12;font-family:var(--mono);font-size:10px;letter-spacing:.14em;color:var(--dim);line-height:2}
+.telemetry b{color:var(--ink);font-weight:400}
+.telemetry .k{display:inline-block;width:96px;opacity:.55}
+
+/* ---------- player ---------- */
+.player{
+  position:fixed;right:72px;bottom:42px;width:404px;z-index:14;
+  border:1px solid var(--line);border-radius:14px;background:var(--glass);
+  backdrop-filter:blur(14px);padding:18px 20px 16px;
+}
+.player .head{display:flex;justify-content:space-between;align-items:center;font-family:var(--mono);font-size:9px;letter-spacing:.26em;color:var(--dim);margin-bottom:14px}
+.player .head .live{display:flex;align-items:center;gap:6px}
+.player .head .live i{width:4px;height:4px;border-radius:50%;background:var(--dim);transition:.3s}
+.player.playing .head .live i{background:var(--amber);box-shadow:0 0 8px var(--amber);animation:pulse 1.6s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.player .body{display:flex;gap:16px;align-items:center}
+.disc{
+  width:58px;height:58px;flex:0 0 58px;border-radius:50%;position:relative;
+  border:1px solid var(--line);
+  background:conic-gradient(from 0deg,rgba(125,227,255,.14),transparent 40%,rgba(255,196,107,.12) 70%,transparent);
+  animation:spin 9s linear infinite;animation-play-state:paused;
+}
+.player.playing .disc{animation-play-state:running}
+.disc::after{content:'';position:absolute;inset:44%;border-radius:50%;background:var(--ink);opacity:.7}
+.disc::before{content:'';position:absolute;inset:18%;border-radius:50%;border:1px solid rgba(255,255,255,.08)}
+@keyframes spin{to{transform:rotate(360deg)}}
+.meta{flex:1;min-width:0}
+.meta .code{font-family:var(--mono);font-size:9px;letter-spacing:.24em;color:var(--dim)}
+.meta .title{font-size:19px;font-weight:500;letter-spacing:-.01em;margin:2px 0 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.track-bar{height:2px;background:rgba(255,255,255,.1);border-radius:2px;position:relative;cursor:none}
+.track-bar .buf{position:absolute;inset:0;width:0;background:rgba(255,255,255,.12);border-radius:2px}
+.track-bar .fill{position:absolute;inset:0;width:0;background:var(--cyan);border-radius:2px;box-shadow:0 0 10px rgba(125,227,255,.6)}
+.track-bar .knob{position:absolute;top:50%;width:7px;height:7px;border-radius:50%;background:var(--cyan);transform:translate(-50%,-50%);left:0;box-shadow:0 0 10px var(--cyan);opacity:0;transition:opacity .2s}
+.track-bar:hover .knob{opacity:1}
+.times{display:flex;justify-content:space-between;font-family:var(--mono);font-size:9px;color:var(--dim);margin-top:7px}
+.ctrls{display:flex;gap:6px;align-items:center;margin-left:auto}
+.ctrls button{
+  width:34px;height:34px;border-radius:50%;border:1px solid var(--line);background:transparent;
+  color:var(--ink);display:grid;place-items:center;cursor:none;transition:.25s;
+}
+.ctrls button:hover{border-color:var(--cyan);color:var(--cyan);background:rgba(125,227,255,.07)}
+.ctrls button.main{width:42px;height:42px;border-color:rgba(255,255,255,.28)}
+.ctrls svg{width:13px;height:13px;fill:currentColor}
+
+.queue{margin-top:16px;border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:1px}
+.queue button{
+  display:flex;align-items:center;gap:12px;width:100%;padding:7px 8px;border:0;border-radius:6px;background:transparent;
+  color:var(--dim);font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-align:left;cursor:none;transition:.22s;
+}
+.queue button:hover{background:rgba(255,255,255,.04);color:var(--ink)}
+.queue button.on{color:var(--amber)}
+.queue button .n{opacity:.5;width:16px}
+.queue button .eq{margin-left:auto;display:flex;gap:2px;align-items:flex-end;height:9px;opacity:0}
+.queue button.on .eq{opacity:1}
+.queue button .eq i{width:2px;background:var(--amber);animation:eq .9s ease-in-out infinite}
+.queue button .eq i:nth-child(2){animation-delay:.18s}
+.queue button .eq i:nth-child(3){animation-delay:.36s}
+@keyframes eq{0%,100%{height:2px}50%{height:9px}}
+
+/* ---------- cursor ---------- */
+.cur-root{position:fixed;left:0;top:0;z-index:9999;pointer-events:none;mix-blend-mode:screen}
+.cur-root.is-out{opacity:0}
+.cur-dot{position:fixed;left:0;top:0;width:4px;height:4px;border-radius:50%;background:#fff;box-shadow:0 0 10px rgba(125,227,255,.9)}
+.cur-ring{
+  position:fixed;left:0;top:0;width:30px;height:30px;border-radius:50%;
+  border:1px solid rgba(125,227,255,.55);transition:width .28s,height .28s,border-color .28s,opacity .28s;
+}
+/* reticle ticks */
+.cur-ring::before,.cur-ring::after{content:'';position:absolute;background:rgba(125,227,255,.7)}
+.cur-ring::before{left:50%;top:-6px;width:1px;height:5px;transform:translateX(-50%);box-shadow:0 41px 0 rgba(125,227,255,.7)}
+.cur-ring::after{top:50%;left:-6px;height:1px;width:5px;transform:translateY(-50%);box-shadow:41px 0 0 rgba(125,227,255,.7)}
+.cur-root.is-hover .cur-ring{width:52px;height:52px;border-color:rgba(255,196,107,.75)}
+.cur-root.is-hover .cur-ring::before,.cur-root.is-hover .cur-ring::after{background:rgba(255,196,107,.85)}
+.cur-root.is-hover .cur-ring::before{box-shadow:0 63px 0 rgba(255,196,107,.85)}
+.cur-root.is-hover .cur-ring::after{box-shadow:63px 0 0 rgba(255,196,107,.85)}
+.cur-root.is-down .cur-ring{width:18px;height:18px}
+
+.badge{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:40;font-family:var(--mono);font-size:9px;letter-spacing:.3em;color:rgba(108,122,144,.7)}
+</style>
+</head>
+<body>
+<canvas id="stars" class="layer"></canvas>
+<canvas id="spot" class="layer"></canvas>
+
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+
+<div class="topbar">
+  <div class="pill">
+    <span id="clockTime">--:--:--</span>
+    <span class="sep"></span>
+    <span class="dim" id="clockDate">—</span>
+  </div>
+
+  <a href="#" class="pill origin" data-hover="ORIGIN">
+    <span class="dot"></span>
+    <span>Coventry, CT</span>
+    <span class="sep"></span>
+    <span class="dim" id="tzLabel">EDT</span>
+  </a>
+
+  <div class="meters">
+    <div class="meter">VOL <div class="bar"><i id="volFill" style="width:68%"></i></div></div>
+    <div class="meter">PWR <div class="bar amber"><i style="width:91%"></i></div></div>
+    <div class="pill" style="padding:7px 12px"><span class="dim">SIG</span> <span>NOMINAL</span></div>
+  </div>
+</div>
+
+<div class="stage">
+  <div class="ident">
+    <div class="eyebrow">Observation Deck · Sol III</div>
+    <h1>Andrew <em>Addo</em></h1>
+    <div class="rule"></div>
+    <p>Engineer · Builder · <span id="roleSlot">Sound</span></p>
+  </div>
+</div>
+
+<nav class="nav">
+  <a href="#" data-hover="OPEN"><span class="idx">01</span><span class="name">About</span></a>
+  <a href="#" data-hover="OPEN"><span class="idx">02</span><span class="name">Work</span></a>
+  <a href="#" data-hover="OPEN"><span class="idx">03</span><span class="name">Sound</span></a>
+  <a href="#" data-hover="OPEN"><span class="idx">04</span><span class="name">Writing</span></a>
+  <a href="#" data-hover="OPEN"><span class="idx">05</span><span class="name">Contact</span></a>
+</nav>
+
+<div class="telemetry">
+  <div><span class="k">COORDINATES</span> <b>41.7701° N &nbsp;72.3051° W</b></div>
+  <div><span class="k">UPTIME</span> <b id="uptime">00:00:00</b></div>
+  <div><span class="k">LOCAL STAR</span> <b>SOL · G2V</b></div>
+  <div><span class="k">STATUS</span> <b style="color:var(--cyan)">RECEIVING</b></div>
+</div>
+
+<section class="player" id="player">
+  <div class="head">
+    <span>Transmission</span>
+    <span class="live"><i></i><span id="playState">STANDBY</span></span>
+  </div>
+  <div class="body">
+    <div class="disc"></div>
+    <div class="meta">
+      <div class="code" id="trkCode">TRX-01</div>
+      <div class="title" id="trkTitle">—</div>
+      <div class="track-bar" id="bar">
+        <div class="buf" id="buf"></div><div class="fill" id="fill"></div><div class="knob" id="knob"></div>
+      </div>
+      <div class="times"><span id="tCur">0:00</span><span id="tDur">0:00</span></div>
+    </div>
+  </div>
+  <div class="ctrls" style="margin-top:14px;justify-content:center">
+    <button id="prev" data-hover="PREV" aria-label="Previous"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6v12l-10-6z"/></svg></button>
+    <button id="toggle" class="main" data-hover="PLAY" aria-label="Play"><svg viewBox="0 0 24 24" id="ppIcon"><path d="M8 5v14l11-7z"/></svg></button>
+    <button id="next" data-hover="NEXT" aria-label="Next"><svg viewBox="0 0 24 24"><path d="M16 6h2v12h-2zM4 6l10 6-10 6z"/></svg></button>
+  </div>
+  <div class="queue" id="queue"></div>
+</section>
+
+<div class="badge">MOCKUP 01 — OBSERVATION DECK</div>
+
+<script src="assets/core.js"></script>
+<script src="assets/tracks.js"></script>
+<script>
+(function(){
+  var S = window.SpaceCore;
+
+  /* background */
+  S.createStarfield(document.getElementById('stars'), {
+    parallax: 30,
+    drift: { x: -2.2, y: .5 },
+    shooting: { every: [5000, 16000], speed: 900 },
+    ripple: { speed: 640, width: 48, amplitude: 36, life: 2.0, ringColor: '125,227,255', ringAlpha: .13 }
+  });
+  S.createSpotlight(document.getElementById('spot'), { radius: 280, brightness: .09, color: '#7de3ff', smoothing: .13 });
+  S.createCursor({ smoothing: .22, ringSmoothing: .11, hoverSelector: 'a,button,[data-hover],.track-bar' });
+
+  /* clock — Coventry, Connecticut */
+  var boot = Date.now();
+  S.createClock('America/New_York', function(c){
+    document.getElementById('clockTime').textContent = c.hour + ':' + c.minute + ':' + c.second;
+    document.getElementById('clockDate').textContent = c.weekday + ' ' + c.day + ' ' + c.month + ' ' + c.year;
+    document.getElementById('tzLabel').textContent = c.timeZoneName;
+    var up = Math.floor((Date.now() - boot) / 1000);
+    document.getElementById('uptime').textContent =
+      String(Math.floor(up/3600)).padStart(2,'0') + ':' +
+      String(Math.floor(up/60)%60).padStart(2,'0') + ':' +
+      String(up%60).padStart(2,'0');
+  }, 200);
+
+  /* rotating role word under the name */
+  var roles = ['Sound','Systems','Stories','Software'], ri = 0, slot = document.getElementById('roleSlot');
+  setInterval(function(){ ri = (ri+1) % roles.length; slot.style.opacity = 0;
+    setTimeout(function(){ slot.textContent = roles[ri]; slot.style.opacity = 1; }, 260);
+  }, 3400);
+  slot.style.transition = 'opacity .26s';
+
+  /* player */
+  var el = {
+    player: document.getElementById('player'), title: document.getElementById('trkTitle'),
+    code: document.getElementById('trkCode'), fill: document.getElementById('fill'),
+    buf: document.getElementById('buf'), knob: document.getElementById('knob'),
+    cur: document.getElementById('tCur'), dur: document.getElementById('tDur'),
+    state: document.getElementById('playState'), icon: document.getElementById('ppIcon'),
+    queue: document.getElementById('queue')
+  };
+  var PLAY = 'M8 5v14l11-7z', PAUSE = 'M6 5h4v14H6zM14 5h4v14h-4z';
+
+  var player = S.createPlayer(window.TRACKS, {
+    onState: function(s){
+      el.title.textContent = s.track.title;
+      el.code.textContent = s.track.code;
+      var p = s.duration ? s.current / s.duration : 0;
+      el.fill.style.width = (p*100) + '%';
+      el.knob.style.left = (p*100) + '%';
+      el.buf.style.width = (s.duration ? s.buffered/s.duration*100 : 0) + '%';
+      el.cur.textContent = S.fmtTime(s.current);
+      el.dur.textContent = S.fmtTime(s.duration);
+      el.player.classList.toggle('playing', s.playing);
+      el.state.textContent = s.playing ? 'ON AIR' : 'STANDBY';
+      el.icon.firstElementChild.setAttribute('d', s.playing ? PAUSE : PLAY);
+      Array.prototype.forEach.call(el.queue.children, function(b,i){ b.classList.toggle('on', i===s.index && s.playing); });
+    }
+  });
+
+  window.TRACKS.forEach(function(t,i){
+    var b = document.createElement('button');
+    b.dataset.hover = 'CUE';
+    b.innerHTML = '<span class="n">'+String(i+1).padStart(2,'0')+'</span><span>'+t.title+'</span>'+
+                  '<span class="eq"><i></i><i></i><i></i></span>';
+    b.onclick = function(){ player.select(i); };
+    el.queue.appendChild(b);
+  });
+
+  document.getElementById('toggle').onclick = function(){ player.toggle(); };
+  document.getElementById('next').onclick = function(){ player.next(); };
+  document.getElementById('prev').onclick = function(){ player.prev(); };
+
+  var bar = document.getElementById('bar');
+  bar.onclick = function(e){ var r = bar.getBoundingClientRect(); player.seek((e.clientX - r.left)/r.width); };
+
+  player.setVolume(.68);
+  document.getElementById('volFill').parentElement.onclick = function(e){
+    var r = this.getBoundingClientRect(), v = (e.clientX - r.left)/r.width;
+    player.setVolume(v); document.getElementById('volFill').style.width = (v*100)+'%';
+  };
+
+  /* keyboard: space toggles, arrows skip */
+  document.addEventListener('keydown', function(e){
+    if (e.code === 'Space'){ e.preventDefault(); player.toggle(); }
+    if (e.code === 'ArrowRight') player.next();
+    if (e.code === 'ArrowLeft') player.prev();
+  });
+})();
+</script>
+</body>
+</html>
