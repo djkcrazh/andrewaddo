@@ -22,25 +22,54 @@ music keeps playing across navigation.
 
 ## Fonts
 
-WorkySpace (brush display) and Aurebesh (Star Wars glyphs) are both **freeware,
-non-commercial**. Fine for a personal site; licence a commercial equivalent before
-this becomes a business asset. Licences are kept alongside the files in
-`assets/fonts/`.
+Three faces, three jobs:
 
-WorkySpace is gorgeous at display sizes and ambiguous at 10px — `LAT` reads as `CAT`,
-`0`/`O` and `1`/`l` are hard to tell apart. **Press `F`** to cycle three modes:
+| face | where | licence |
+|---|---|---|
+| **WorkySpace** (brush display) | the name, view titles, and all side/top panel chrome | freeware, non-commercial |
+| **Naru Mono** | everything on the centre screen, plus every numeric readout | **demo** — personal use only |
+| **Aurebesh** | the name's glitch state only | freeware, non-commercial |
 
-| mode | numerals | micro-labels | notes |
-|------|----------|--------------|-------|
-| `hybrid` *(default)* | IBM Plex Mono | WorkySpace | closest to "across the board" while the clock stays readable |
-| `all` | WorkySpace | WorkySpace | fully across the board |
-| `labels` | IBM Plex Mono | IBM Plex Mono | WorkySpace for content only — most legible |
+All three are personal-use. Fine for a portfolio; licence proper versions before this
+becomes a business asset. Licences live beside the files in `assets/fonts/`.
 
-Set the default by changing `data-font` on `<html>` in `index.html`.
+### Naru Mono is a DEMO build — watch the punctuation
 
-**Aurebesh flash:** the name holds Latin for 3s, stutters, holds Aurebesh for 0.5s,
-stutters back. Aurebesh runs 1.43x wider at the same size, so it renders at 0.70em to
-keep the swap from jumping. Pauses automatically when Home is off-screen.
+The demo substitutes a **"LTS" watermark box** for characters it does not ship:
+
+    —  (em dash)    –  (en dash)    ’  “  ”  (curly quotes)    …  (ellipsis)
+
+All copy currently uses `--`, straight quotes and `·` instead. Keep doing that, or buy
+the full family (link in `assets/fonts/NaruMono-README.txt`). Arrows (→ ← ↑ ↓), `·`,
+`°`, `%`, `»`, `«` all render fine.
+
+### Press F to re-wire the three font roles
+
+| mode | centre screen | panel labels | numerals |
+|---|---|---|---|
+| `panels` *(default)* | Naru | WorkySpace | Naru |
+| `naru` | Naru | Naru | Naru |
+| `worky` | WorkySpace | WorkySpace | WorkySpace |
+
+`panels` is what is asked for: the name and the dashboard chrome stay WorkySpace,
+everything you actually read is Naru. `naru` also fixes the panel labels, where
+WorkySpace turns `LAT` into `CAT`. Set the default via `data-font` on `<html>`.
+
+### The name glitch
+
+Latin holds 3s, Aurebesh holds 0.5s, and the swap between them is a 340ms decode:
+
+- every letter scrambles through junk glyphs, coin-flipping between both alphabets,
+  then locks into its target — staggered 16ms apart, left to right
+- two chromatic ghost copies (red/cyan, `mix-blend-mode: screen`) slice into
+  horizontal bands and jump sideways
+- a bright scan line sweeps top to bottom
+- the whole block jitters on a stepped keyframe
+
+Aurebesh runs 1.43x wider than WorkySpace at the same size, so it renders at `.70em`
+to keep the swap from shoving the layout. Honours `prefers-reduced-motion`, and the
+loop idles while Home is off-screen. Tuning lives at the top of the name block in
+`assets/site.js` (`NAME`, `POOL`, `GLITCH_MS`) and in the `g*` keyframes in `index.html`.
 
 ## Placeholders
 
@@ -55,8 +84,8 @@ keep the swap from jumping. Pauses automatically when Home is off-screen.
 
 - **Audio weight.** Four `.wav` files at 23–35 MB each, ~115 MB total. Convert:
   `ffmpeg -i in.wav -codec:a libmp3lame -b:a 192k out.mp3` — roughly 3 MB per track.
-- **Font weight.** `WorkySpace.otf` is 394 KB. Convert to woff2 (~40% of that) and
-  subset to Latin.
+- **Font weight.** `WorkySpace.otf` is 394 KB, `NaruMono.ttf` 188 KB, `Aurebesh.otf`
+  80 KB -- 660 KB of fonts. Convert to woff2 (~40% of that) and subset to Latin.
 - **Solar times** use the short NOAA formula — accurate to a few minutes.
 
 ## Vercel

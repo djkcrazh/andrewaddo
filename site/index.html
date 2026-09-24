@@ -1,17 +1,15 @@
 <!DOCTYPE html>
-<html lang="en" data-font="hybrid">
+<html lang="en" data-font="panels">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Andrew Addo</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@200;300;400;500&display=swap" rel="stylesheet">
 <style>
 /* ===== fonts ================================================== */
 @font-face{font-family:'WorkySpace';src:url('assets/fonts/WorkySpace.otf') format('opentype');font-weight:400;font-display:swap}
 @font-face{font-family:'Aurebesh';src:url('assets/fonts/Aurebesh.otf') format('opentype');font-weight:400;font-display:block}
 @font-face{font-family:'Aurebesh';src:url('assets/fonts/Aurebesh-Bold.otf') format('opentype');font-weight:700;font-display:block}
+@font-face{font-family:'NaruMono';src:url('assets/fonts/NaruMono.ttf') format('truetype');font-weight:400;font-display:swap}
 
 :root{
   --void:#04060a;
@@ -24,16 +22,21 @@
   --line2:rgba(138,215,255,.34);
   --amber:#fbbf24;
 
-  --display:'WorkySpace','Trebuchet MS',cursive;
-  --mono:'IBM Plex Mono',ui-monospace,monospace;
-  /* --data = numeric readouts, --micro = small tracked labels.
-     Press F to cycle: hybrid -> all -> labels. */
-  --data:var(--mono);
+  --display:'WorkySpace','Trebuchet MS',cursive;   /* the name + panel chrome */
+  --mono:'NaruMono',ui-monospace,monospace;        /* everything you actually read */
+
+  /* Three roles the F key re-wires:
+     --prose = centre-screen copy, --micro = panel/strip labels, --data = numerals */
+  --prose:var(--mono);
   --micro:var(--display);
+  --data:var(--mono);
 }
-html[data-font="all"]{    --data:var(--display); --micro:var(--display); }
-html[data-font="hybrid"]{ --data:var(--mono);    --micro:var(--display); }
-html[data-font="labels"]{ --data:var(--mono);    --micro:var(--mono); }
+/* default: panels keep WorkySpace, the screen reads in Naru */
+html[data-font="panels"]{ --prose:var(--mono);    --micro:var(--display); --data:var(--mono); }
+/* everything legible: Naru on the panel labels too */
+html[data-font="naru"]{   --prose:var(--mono);    --micro:var(--mono);    --data:var(--mono); }
+/* the original: WorkySpace on absolutely everything */
+html[data-font="worky"]{  --prose:var(--display); --micro:var(--display); --data:var(--display); }
 
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
@@ -138,30 +141,86 @@ body::after{content:'';position:fixed;inset:0;z-index:55;pointer-events:none;
 
 /* --- section heading used by every non-home view --- */
 .vwhead{margin-bottom:30px}
-.vwhead .kick{font-family:var(--data);font-size:9px;letter-spacing:.34em;color:var(--blue);text-transform:uppercase}
-.vwhead h2{font-size:46px;font-weight:400;line-height:1.05;margin-top:12px;letter-spacing:.005em}
-.vwhead .lede{font-size:15px;color:var(--dim);margin-top:14px;max-width:62ch;line-height:1.85}
+.vwhead .kick{font-family:var(--prose);font-size:9px;letter-spacing:.34em;color:var(--blue);text-transform:uppercase}
+.vwhead h2{font-family:var(--display);font-size:46px;font-weight:400;line-height:1.05;margin-top:12px;letter-spacing:.005em}
+.vwhead .lede{font-family:var(--prose);font-size:13.5px;color:var(--dim);margin-top:14px;max-width:62ch;line-height:1.85}
 
 /* --- HOME --- */
-.ident .tag{font-family:var(--data);font-size:9px;letter-spacing:.42em;color:var(--blue);text-transform:uppercase;margin-bottom:22px}
+.ident .tag{font-family:var(--prose);font-size:9px;letter-spacing:.42em;color:var(--blue);text-transform:uppercase;margin-bottom:22px}
 .ident h1{
   --ns:clamp(28px,11.5cqw,104px);
   font-size:var(--ns);font-weight:400;line-height:1;color:#fff;white-space:nowrap;
   height:calc(var(--ns)*1.32);display:grid;place-items:center;letter-spacing:.01em;
+  position:relative;isolation:isolate;
 }
-/* Aurebesh runs 1.43x wider than WorkySpace at the same size — scale it back
-   so the swap breathes instead of jumping */
-.ident h1.holo{font-family:'Aurebesh';font-size:calc(var(--ns)*.70);letter-spacing:.05em;
-  color:var(--blue);text-shadow:0 0 22px rgba(138,215,255,.85),0 0 60px rgba(138,215,255,.35)}
-.ident h1.flicker{animation:holoflick .26s steps(3,end)}
-@keyframes holoflick{
-  0%{opacity:1;transform:translateX(0) scaleY(1)}
-  30%{opacity:.35;transform:translateX(-3px) scaleY(1.06);filter:blur(1.5px)}
-  60%{opacity:.85;transform:translateX(2px) scaleY(.97)}
-  100%{opacity:1;transform:translateX(0) scaleY(1);filter:blur(0)}
+.ident h1 .glyphs,.ident h1 .ghost,.ident h1 .sweep{grid-area:1/1;white-space:nowrap}
+.ident h1 b{display:inline-block;font-weight:inherit;font-style:normal;
+  transition:color .16s linear,text-shadow .16s linear}
+/* Aurebesh runs 1.43x wider than WorkySpace, so it rides at .70em to keep the
+   swap from shoving the layout around */
+.ident h1 b.aure{font-family:'Aurebesh';font-size:.70em;color:var(--blue);
+  text-shadow:0 0 18px rgba(138,215,255,.9),0 0 48px rgba(138,215,255,.38)}
+.ident h1 b.scram{color:#eaf6ff;text-shadow:0 0 14px rgba(138,215,255,.7)}
+
+/* --- glitch: chromatic ghosts, band slicing, a scan sweep, and per-letter decode --- */
+.ident h1 .ghost{opacity:0;pointer-events:none;mix-blend-mode:screen;will-change:transform,clip-path}
+.ident h1 .ghost b{text-shadow:none!important}
+.ident h1 .g1 b{color:#ff2f6d!important}
+.ident h1 .g2 b{color:#38f2ff!important}
+.ident h1 .sweep{opacity:0;pointer-events:none;mix-blend-mode:screen;justify-self:stretch;align-self:stretch;
+  background:linear-gradient(180deg,transparent 42%,rgba(190,235,255,.75) 50%,transparent 58%)}
+
+.ident h1.glitching{animation:gJitter .34s steps(1,end)}
+.ident h1.glitching .glyphs{animation:gBlink .34s steps(1,end)}
+.ident h1.glitching .ghost{opacity:1}
+.ident h1.glitching .g1{animation:gSliceA .34s steps(1,end)}
+.ident h1.glitching .g2{animation:gSliceB .34s steps(1,end)}
+.ident h1.glitching .sweep{opacity:1;animation:gSweep .34s linear}
+
+@keyframes gJitter{
+  0%,100%{transform:translate(0,0)}
+  9%{transform:translate(-3px,1px)}
+  21%{transform:translate(4px,-2px)}
+  36%{transform:translate(-2px,-1px)}
+  52%{transform:translate(3px,2px)}
+  68%{transform:translate(-5px,0)}
+  84%{transform:translate(2px,-1px)}
+}
+@keyframes gBlink{
+  0%,100%{opacity:1}
+  14%{opacity:.55}
+  30%{opacity:1}
+  46%{opacity:.35}
+  62%{opacity:1}
+  78%{opacity:.7}
+}
+@keyframes gSliceA{
+  0%  {clip-path:inset(0 0 74% 0);   transform:translateX(-11px)}
+  18% {clip-path:inset(30% 0 46% 0); transform:translateX(8px)}
+  36% {clip-path:inset(56% 0 20% 0); transform:translateX(-14px)}
+  54% {clip-path:inset(8% 0 70% 0);  transform:translateX(6px)}
+  72% {clip-path:inset(72% 0 6% 0);  transform:translateX(-7px)}
+  88% {clip-path:inset(40% 0 38% 0); transform:translateX(10px)}
+  100%{clip-path:inset(0 0 100% 0);  transform:translateX(0)}
+}
+@keyframes gSliceB{
+  0%  {clip-path:inset(62% 0 12% 0); transform:translateX(9px)}
+  18% {clip-path:inset(4% 0 78% 0);  transform:translateX(-7px)}
+  36% {clip-path:inset(44% 0 34% 0); transform:translateX(12px)}
+  54% {clip-path:inset(68% 0 10% 0); transform:translateX(-5px)}
+  72% {clip-path:inset(20% 0 58% 0); transform:translateX(8px)}
+  88% {clip-path:inset(52% 0 26% 0); transform:translateX(-10px)}
+  100%{clip-path:inset(0 0 100% 0);  transform:translateX(0)}
+}
+@keyframes gSweep{from{transform:translateY(-110%)}to{transform:translateY(110%)}}
+
+@media (prefers-reduced-motion:reduce){
+  .ident h1.glitching,.ident h1.glitching .glyphs,.ident h1.glitching .ghost,
+  .ident h1.glitching .sweep{animation:none}
+  .ident h1.glitching .ghost{opacity:0}
 }
 .ident .line{width:120px;height:1px;background:linear-gradient(90deg,transparent,var(--line2),transparent);margin:26px auto}
-.ident .tags{font-size:17px;letter-spacing:.22em;color:var(--dim);text-transform:uppercase}
+.ident .tags{font-family:var(--prose);font-size:14px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase}
 .ident .tags i{font-style:normal;color:var(--blue);margin:0 10px}
 
 /* --- ABOUT --- */
@@ -171,11 +230,11 @@ body::after{content:'';position:fixed;inset:0;z-index:55;pointer-events:none;
 .imgslot::before,.imgslot::after{content:'';position:absolute;width:9px;height:9px;border:1px solid var(--line2)}
 .imgslot::before{left:6px;top:6px;border-right:0;border-bottom:0}
 .imgslot::after{right:6px;bottom:6px;border-left:0;border-top:0}
-.imgslot span{font-family:var(--data);font-size:9px;letter-spacing:.24em;color:var(--dim);text-align:center;line-height:2}
-.prose p{font-size:15px;line-height:1.95;color:#b9c6d4;margin-bottom:16px;max-width:60ch}
+.imgslot span{font-family:var(--prose);font-size:9px;letter-spacing:.24em;color:var(--dim);text-align:center;line-height:2}
+.prose p{font-family:var(--prose);font-size:13.5px;line-height:1.95;color:#b9c6d4;margin-bottom:16px;max-width:60ch}
 .prose p.first::first-letter{font-size:34px;color:var(--blue);line-height:1;padding-right:3px}
 .facts{margin-top:26px;border-top:1px solid var(--line);padding-top:16px}
-.facts .row{padding:6px 0;font-size:11px;letter-spacing:.11em;text-transform:uppercase}
+.facts .row{font-family:var(--prose);padding:6px 0;font-size:11px;letter-spacing:.11em;text-transform:uppercase}
 
 /* --- PROJECTS --- */
 .plist{display:flex;flex-direction:column}
@@ -184,20 +243,20 @@ body::after{content:'';position:fixed;inset:0;z-index:55;pointer-events:none;
   cursor:none;transition:.28s cubic-bezier(.2,.8,.2,1)}
 .pitem:hover{background:linear-gradient(90deg,rgba(138,215,255,.07),transparent);padding-left:18px}
 .pitem .n{font-family:var(--data);font-size:10px;color:var(--dim);letter-spacing:.1em}
-.pitem .t{font-size:23px;line-height:1.25}
-.pitem .d{font-size:12.5px;color:var(--dim);margin-top:5px;line-height:1.7}
+.pitem .t{font-family:var(--prose);font-size:19px;line-height:1.3;letter-spacing:.01em}
+.pitem .d{font-family:var(--prose);font-size:12px;color:var(--dim);margin-top:5px;line-height:1.7}
 .pitem .stack{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
-.pitem .stack em{font-style:normal;font-family:var(--data);font-size:8.5px;letter-spacing:.14em;
+.pitem .stack em{font-style:normal;font-family:var(--prose);font-size:8.5px;letter-spacing:.14em;
   border:1px solid var(--line);padding:3px 7px;color:var(--dim);text-transform:uppercase}
-.pitem .meta{text-align:right;font-family:var(--data);font-size:10px;letter-spacing:.12em;color:var(--dim);line-height:2}
+.pitem .meta{text-align:right;font-family:var(--prose);font-size:10px;letter-spacing:.12em;color:var(--dim);line-height:2}
 .pitem .meta b{display:block;color:var(--blue);font-weight:400}
 .pitem:hover .t{color:var(--blue)}
 
 /* --- SKILLS --- */
 .skgrid{display:grid;grid-template-columns:1fr 1fr;gap:30px 40px}
-.skgroup h3{font-family:var(--data);font-size:9px;letter-spacing:.3em;color:var(--blue);
+.skgroup h3{font-family:var(--prose);font-size:9px;letter-spacing:.3em;color:var(--blue);
   text-transform:uppercase;margin-bottom:14px;padding-bottom:9px;border-bottom:1px solid var(--line)}
-.skrow{display:flex;align-items:center;gap:12px;padding:8px 0;font-size:13px;color:#b9c6d4}
+.skrow{display:flex;align-items:center;gap:12px;padding:8px 0;font-family:var(--prose);font-size:12px;color:#b9c6d4}
 .skrow .nm{flex:0 0 136px;letter-spacing:.02em;font-size:12.5px;line-height:1.3}
 .skrow .mb{flex:1;height:2px;background:rgba(138,215,255,.13)}
 .skrow .mb i{display:block;height:100%;background:var(--blue);box-shadow:0 0 7px rgba(138,215,255,.6);
@@ -205,29 +264,29 @@ body::after{content:'';position:fixed;inset:0;z-index:55;pointer-events:none;
 .resume{margin-top:34px;border:1px solid var(--line);padding:22px 24px;display:flex;
   align-items:center;gap:22px;background:linear-gradient(120deg,rgba(138,215,255,.06),transparent)}
 .resume .rt{flex:1}
-.resume .rt b{display:block;font-size:20px;font-weight:400;margin-bottom:6px}
-.resume .rt span{font-family:var(--data);font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
+.resume .rt b{display:block;font-family:var(--prose);font-size:17px;font-weight:400;margin-bottom:6px}
+.resume .rt span{font-family:var(--prose);font-size:10px;letter-spacing:.16em;color:var(--dim);text-transform:uppercase}
 .btn{border:1px solid var(--line2);background:transparent;color:var(--ink);cursor:none;
-  padding:12px 22px;font-family:var(--data);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
+  padding:12px 22px;font-family:var(--prose);font-size:10px;letter-spacing:.2em;text-transform:uppercase;
   text-decoration:none;display:inline-flex;align-items:center;gap:10px;transition:.26s}
 .btn:hover{border-color:var(--blue);color:var(--blue);background:rgba(138,215,255,.08);gap:16px}
 
 /* --- SOUND --- */
 .bigwave{width:100%;height:86px;border:1px solid var(--line);margin-bottom:8px;cursor:none;display:block}
-.soundmeta{display:flex;justify-content:space-between;font-family:var(--data);font-size:10px;
+.soundmeta{display:flex;justify-content:space-between;font-family:var(--prose);font-size:10px;
   letter-spacing:.14em;color:var(--dim);margin-bottom:26px;text-transform:uppercase}
 .trow{display:grid;grid-template-columns:38px 34px 1fr auto auto;gap:16px;align-items:center;
   padding:13px 10px;border-bottom:1px solid rgba(138,215,255,.09);cursor:none;transition:.24s;
   background:transparent;border-left:0;border-right:0;border-top:0;width:100%;text-align:left;color:inherit;font-family:inherit}
 .trow:hover{background:rgba(138,215,255,.06);padding-left:16px}
-.trow .n{font-family:var(--data);font-size:10px;color:var(--dim)}
+.trow .n{font-family:var(--prose);font-size:10px;color:var(--dim)}
 .trow .pp{width:26px;height:26px;border:1px solid var(--line);display:grid;place-items:center;transition:.24s}
 .trow .pp svg{width:9px;height:9px;fill:var(--dim)}
 .trow:hover .pp{border-color:var(--blue)}
 .trow:hover .pp svg{fill:var(--blue)}
-.trow .tt{font-size:18px}
-.trow .cd{font-family:var(--data);font-size:9.5px;letter-spacing:.14em;color:var(--dim)}
-.trow .du{font-family:var(--data);font-size:10px;color:var(--dim);font-variant-numeric:tabular-nums;min-width:40px;text-align:right}
+.trow .tt{font-family:var(--prose);font-size:15px;letter-spacing:.01em}
+.trow .cd{font-family:var(--prose);font-size:9.5px;letter-spacing:.14em;color:var(--dim)}
+.trow .du{font-family:var(--prose);font-size:10px;color:var(--dim);font-variant-numeric:tabular-nums;min-width:40px;text-align:right}
 .trow.on .tt{color:var(--blue)}
 .trow.on .pp{border-color:var(--blue);background:rgba(138,215,255,.1)}
 .trow.on .pp svg{fill:var(--blue)}
@@ -245,20 +304,20 @@ body::after{content:'';position:fixed;inset:0;z-index:55;pointer-events:none;
   padding:15px 10px;border-bottom:1px solid rgba(138,215,255,.09);text-decoration:none;color:inherit;
   cursor:none;transition:.26s}
 .chan a:hover{background:linear-gradient(90deg,rgba(138,215,255,.07),transparent);padding-left:18px}
-.chan a .k{font-family:var(--data);font-size:9.5px;letter-spacing:.24em;color:var(--dim);text-transform:uppercase}
-.chan a .v{font-size:17px}
+.chan a .k{font-family:var(--prose);font-size:9.5px;letter-spacing:.24em;color:var(--dim);text-transform:uppercase}
+.chan a .v{font-family:var(--prose);font-size:15px}
 .chan a:hover .v{color:var(--blue)}
-.chan a .ar{font-family:var(--data);color:var(--dim);transition:.26s}
+.chan a .ar{font-family:var(--prose);color:var(--dim);transition:.26s}
 .chan a:hover .ar{color:var(--blue);transform:translateX(4px)}
 .cform{display:grid;gap:12px;max-width:520px}
 .cform input,.cform textarea{
   background:rgba(138,215,255,.04);border:1px solid var(--line);color:var(--ink);
-  font-family:var(--display);font-size:15px;padding:13px 15px;cursor:none;outline:none;transition:.24s;
+  font-family:var(--prose);font-size:13.5px;padding:13px 15px;cursor:none;outline:none;transition:.24s;
 }
 .cform input:focus,.cform textarea:focus{border-color:var(--blue);background:rgba(138,215,255,.07)}
-.cform input::placeholder,.cform textarea::placeholder{color:var(--dim);font-family:var(--data);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.cform input::placeholder,.cform textarea::placeholder{color:var(--dim);font-family:var(--prose);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
 .cform textarea{min-height:120px;resize:vertical}
-.cnote{font-family:var(--data);font-size:9px;letter-spacing:.18em;color:var(--dim);margin-top:12px;text-transform:uppercase}
+.cnote{font-family:var(--prose);font-size:9px;letter-spacing:.18em;color:var(--dim);margin-top:12px;text-transform:uppercase}
 
 /* ===== right column =========================================== */
 .col-r{grid-column:3;grid-row:2;display:flex;flex-direction:column;gap:14px;min-height:0}
@@ -342,7 +401,7 @@ body::after{content:'';position:fixed;inset:0;z-index:55;pointer-events:none;
     <div class="panel chrono">
       <h2>Chronometer <span class="id">C-01</span></h2>
       <div class="big"><span id="hm">--:--</span><s id="ss">--</s></div>
-      <div class="sub" id="dstr">&mdash;</div>
+      <div class="sub" id="dstr">--</div>
       <div class="arcwrap">
         <svg viewBox="0 0 100 100">
           <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(138,215,255,.14)" stroke-width="3"/>
@@ -392,7 +451,12 @@ body::after{content:'';position:fixed;inset:0;z-index:55;pointer-events:none;
       <section class="vw center on" id="v-home">
         <div class="ident">
           <div class="tag">Deep field &middot; observation</div>
-          <h1 id="nameGlyph"><span class="np">Andrew Addo</span></h1>
+          <h1 id="nameGlyph" aria-label="Andrew Addo">
+            <span class="glyphs" id="glyphs"></span>
+            <span class="ghost g1" id="ghost1" aria-hidden="true"></span>
+            <span class="ghost g2" id="ghost2" aria-hidden="true"></span>
+            <span class="sweep" aria-hidden="true"></span>
+          </h1>
           <div class="line"></div>
           <div class="tags">Engineer <i>*</i> Artist <i>*</i> Builder</div>
         </div>
@@ -403,22 +467,22 @@ body::after{content:'';position:fixed;inset:0;z-index:55;pointer-events:none;
         <div class="vwhead">
           <div class="kick">Record 01 &middot; Origin</div>
           <h2>About</h2>
-          <div class="lede">Placeholder copy &mdash; swap this for the real thing. Everything below is
+          <div class="lede">Placeholder copy -- swap this for the real thing. Everything below is
             structure, so the words can be as long or short as they need to be.</div>
         </div>
         <div class="about">
           <div class="imgslot"><span>PORTRAIT<br>PENDING<br>3:4</span></div>
           <div class="prose">
-            <p class="first">He grew up in Coventry, Connecticut &mdash; a small town in the eastern
+            <p class="first">He grew up in Coventry, Connecticut -- a small town in the eastern
               half of the state, the kind of place where the sky is still dark enough to see things in it.
               This section is where that story goes.</p>
             <p>A second paragraph for the through-line: what he builds, why he builds it, and what the
               work is pointed at. Keep it short enough that someone reads the whole thing.</p>
-            <p>A third for the present tense &mdash; what he is working on right now, and what he is
+            <p>A third for the present tense -- what he is working on right now, and what he is
               looking for next.</p>
             <div class="facts">
               <div class="row"><span>Born</span><b>COVENTRY, CT</b></div>
-              <div class="row"><span>Based</span><b>&mdash;</b></div>
+              <div class="row"><span>Based</span><b>--</b></div>
               <div class="row"><span>Pronouns</span><b>HE / HIM</b></div>
               <div class="row hl"><span>Status</span><b>BUILDING</b></div>
             </div>
@@ -448,7 +512,7 @@ body::after{content:'';position:fixed;inset:0;z-index:55;pointer-events:none;
         <div class="resume">
           <div class="rt">
             <b>Resume</b>
-            <span>PDF &middot; updated &mdash; &middot; drop the file at /assets/resume.pdf</span>
+            <span>PDF &middot; updated -- &middot; drop the file at /assets/resume.pdf</span>
           </div>
           <a class="btn" href="assets/resume.pdf" data-hover="DOWNLOAD">Download <span>&darr;</span></a>
         </div>
@@ -475,21 +539,21 @@ body::after{content:'';position:fixed;inset:0;z-index:55;pointer-events:none;
         <div class="vwhead">
           <div class="kick">Record 05 &middot; Open channel</div>
           <h2>Contact</h2>
-          <div class="lede">Swap in the real handles. The form is structure only for now &mdash;
+          <div class="lede">Swap in the real handles. The form is structure only for now --
             it needs an endpoint before it sends anything.</div>
         </div>
         <div class="chan">
-          <a href="#" data-hover="EMAIL"><span class="k">Email</span><span class="v">&mdash;</span><span class="ar">&rarr;</span></a>
-          <a href="#" data-hover="GITHUB"><span class="k">GitHub</span><span class="v">&mdash;</span><span class="ar">&rarr;</span></a>
-          <a href="#" data-hover="LINKEDIN"><span class="k">LinkedIn</span><span class="v">&mdash;</span><span class="ar">&rarr;</span></a>
-          <a href="#" data-hover="INSTAGRAM"><span class="k">Instagram</span><span class="v">&mdash;</span><span class="ar">&rarr;</span></a>
+          <a href="#" data-hover="EMAIL"><span class="k">Email</span><span class="v">--</span><span class="ar">&rarr;</span></a>
+          <a href="#" data-hover="GITHUB"><span class="k">GitHub</span><span class="v">--</span><span class="ar">&rarr;</span></a>
+          <a href="#" data-hover="LINKEDIN"><span class="k">LinkedIn</span><span class="v">--</span><span class="ar">&rarr;</span></a>
+          <a href="#" data-hover="INSTAGRAM"><span class="k">Instagram</span><span class="v">--</span><span class="ar">&rarr;</span></a>
         </div>
         <form class="cform" id="cform">
           <input type="text" placeholder="Callsign / name" />
           <input type="email" placeholder="Return address" />
           <textarea placeholder="Message"></textarea>
           <div><button type="submit" class="btn" data-hover="SEND">Transmit <span>&rarr;</span></button></div>
-          <div class="cnote" id="cnote">Form not wired &mdash; needs an endpoint</div>
+          <div class="cnote" id="cnote">Form not wired -- needs an endpoint</div>
         </form>
       </section>
 
@@ -513,7 +577,7 @@ body::after{content:'';position:fixed;inset:0;z-index:55;pointer-events:none;
     <div class="panel tx">
       <h2>Transmission <span class="id">T-05</span></h2>
       <canvas class="wave" id="wave"></canvas>
-      <div class="txhead"><div class="t" id="trkTitle">&mdash;</div><div class="c" id="trkCode">TRX-01</div></div>
+      <div class="txhead"><div class="t" id="trkTitle">--</div><div class="c" id="trkCode">TRX-01</div></div>
       <div class="txctrl">
         <button id="prev" data-hover="PREV"><svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zM20 6v12l-10-6z"/></svg></button>
         <button id="toggle" data-hover="PLAY"><svg viewBox="0 0 24 24" id="ppIcon"><path d="M8 5v14l11-7z"/></svg></button>

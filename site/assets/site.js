@@ -80,31 +80,84 @@
   })();
 
   /* --------------------------------------------------- name / Aurebesh flash
-     Latin for 3s, then the Star Wars glyph set for half a second, with a
-     hologram stutter on each swap. Pauses when Home is off-screen. */
-  var nameEl = $('nameGlyph');
-  var holoTimer = null, onHome = true;
-  // pull Aurebesh down before the first swap so it never flashes a fallback
+     Latin for 3s, Aurebesh for 0.5s. The swap is a decode: every letter
+     independently scrambles through junk glyphs (flickering between both
+     alphabets) and locks into its target, staggered left to right, under a
+     chromatic band-slice and a scan sweep. */
+  var NAME = 'Andrew Addo';
+  var POOL = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  var GLITCH_MS = 340;                    // must match the CSS animation length
+
+  var nameEl = $('nameGlyph'), glyphs = $('glyphs');
+  var ghosts = [$('ghost1'), $('ghost2')];
+  var cells = [], isAure = false, busy = false, onHome = true;
+
   if (document.fonts && document.fonts.load) document.fonts.load('60px Aurebesh');
 
-  function flick() {
-    nameEl.classList.remove('flicker');
-    void nameEl.offsetWidth;              // restart the animation
-    nameEl.classList.add('flicker');
+  (function buildName() {
+    NAME.split('').forEach(function (ch) {
+      var b = document.createElement('b');
+      var space = ch === ' ';
+      if (space) { b.innerHTML = '&nbsp;'; b.dataset.sp = '1'; }
+      else b.textContent = ch;
+      glyphs.appendChild(b);
+      cells.push({ el: b, ch: ch, space: space });
+    });
+    syncGhosts();
+  })();
+
+  // the chromatic ghosts are literal copies — clip-path and blend do the rest
+  function syncGhosts() {
+    var html = glyphs.innerHTML;
+    ghosts[0].innerHTML = html;
+    ghosts[1].innerHTML = html;
   }
-  function holoCycle() {
-    holoTimer = setTimeout(function () {
-      if (!onHome) { holoCycle(); return; }
-      flick();
-      setTimeout(function () { nameEl.classList.add('holo'); }, 80);
+
+  function decode(toAure) {
+    if (busy) return;
+    busy = true;
+    nameEl.classList.add('glitching');
+
+    var live = 0;
+    cells.forEach(function (c) { if (!c.space) live++; });
+    var done = 0;
+
+    cells.forEach(function (c, i) {
+      if (c.space) { c.el.className = toAure ? 'aure' : ''; return; }
       setTimeout(function () {
-        flick();
-        setTimeout(function () { nameEl.classList.remove('holo'); }, 80);
-        holoCycle();
-      }, 500);
-    }, 3000);
+        var n = 0;
+        (function step() {
+          if (n < 3) {
+            // junk glyph, and a coin-flip on which alphabet renders it
+            c.el.textContent = POOL[(Math.random() * POOL.length) | 0];
+            c.el.className = Math.random() < 0.5 ? 'scram aure' : 'scram';
+            n++;
+            syncGhosts();
+            setTimeout(step, 40);
+          } else {
+            c.el.textContent = c.ch;
+            c.el.className = toAure ? 'aure' : '';
+            syncGhosts();
+            if (++done === live) {
+              setTimeout(function () {
+                nameEl.classList.remove('glitching');
+                busy = false;
+              }, 40);
+            }
+          }
+        })();
+      }, i * 16);
+    });
   }
-  holoCycle();
+
+  (function holoLoop() {
+    setTimeout(function () {
+      if (!onHome) { holoLoop(); return; }   // no point animating an off-screen view
+      isAure = !isAure;
+      decode(isAure);
+      holoLoop();
+    }, isAure ? 500 + GLITCH_MS : 3000);
+  })();
 
   /* -------------------------------------------------------------- routing */
   var VIEWS = ['home', 'about', 'projects', 'skills', 'sound', 'contact'];
@@ -212,7 +265,7 @@
     $('ppIcon').firstElementChild.setAttribute('d', s.playing ? PAUSE : PLAY);
     $('feedTrk').textContent = s.playing ? s.track.code : 'IDLE';
 
-    $('sNow').textContent = (s.playing ? 'Now playing — ' : 'Cued — ') + s.track.title;
+    $('sNow').textContent = (s.playing ? 'Now playing / ' : 'Cued / ') + s.track.title;
     $('sCur').textContent = S.fmtTime(s.current);
     $('sDur').textContent = S.fmtTime(s.duration);
 
@@ -300,7 +353,7 @@
   /* ----------------------------------------------------------- contact -- */
   $('cform').addEventListener('submit', function (e) {
     e.preventDefault();
-    $('cnote').textContent = 'No endpoint yet — wire this to a form handler before launch';
+    $('cnote').textContent = 'No endpoint yet - wire this to a form handler before launch';
     $('cnote').style.color = 'var(--amber)';
   });
 
@@ -308,9 +361,9 @@
      WorkySpace is a brush face: gorgeous large, ambiguous at 10px. These three
      modes let you judge how far to push it. */
   var FONT_MODES = [
-    ['hybrid', 'WorkySpace · mono numerals'],
-    ['all',    'WorkySpace everywhere'],
-    ['labels', 'WorkySpace display only']
+    ['panels', 'Naru on screen · WorkySpace panels'],
+    ['naru',   'Naru everywhere but the name'],
+    ['worky',  'WorkySpace everywhere']
   ];
   var fi = 0, toast = $('toast'), toastT;
   function cycleFont() {

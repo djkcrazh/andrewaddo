@@ -1,0 +1,2 @@
+﻿license: Demo
+link: https://www.fontspace.com/naru-mono-font-f144980
