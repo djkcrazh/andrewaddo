@@ -1,3 +1,5 @@
 mockups/assets/audio/
+site/assets/audio/
 node_modules/
 .DS_Store
+.gstack/

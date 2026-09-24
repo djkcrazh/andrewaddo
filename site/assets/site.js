@@ -1,0 +1,334 @@
+/* ============================================================================
+   site.js — Andrew Addo portfolio. Telemetry shell, six views, one dashboard
+   that never reloads: the chrome stays lit, the centre screen swaps.
+   ========================================================================= */
+(function () {
+  'use strict';
+  var S = window.SpaceCore;
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------------------------------------------------------------- field */
+  S.createStarfield($('stars'), {
+    parallax: 20,
+    drift: { x: -1.1, y: .25 },
+    layers: [
+      { count: 340, size: [.35, .8], depth: .2,  alpha: [.18, .45], color: '#ffffff' },
+      { count: 120, size: [.7, 1.3], depth: .55, alpha: [.3, .7],   color: '#cfe6ff' },
+      { count: 26,  size: [1.2, 2.0],depth: 1,   alpha: [.5, .95],  color: '#8ad7ff' }
+    ],
+    ripple: { speed: 700, width: 38, amplitude: 26, life: 1.6, ringColor: '138,215,255', ringAlpha: .2 }
+  });
+  S.createSpotlight($('spot'), { radius: 220, brightness: .07, color: '#8ad7ff', smoothing: .2 });
+
+  var cur = S.createCursor({
+    smoothing: .3, ringSmoothing: .16, magnet: false, ringRotate: false,
+    hoverSelector: 'a,button,[data-hover],input,textarea,.wave,.bigwave,.trow,.pitem'
+  });
+
+  var sX = $('scanX'), sY = $('scanY'), ro = $('readout'), cxy = $('curXY');
+  (function scan() {
+    var p = cur.pos();
+    sX.style.transform = 'translateY(' + p.y + 'px)';
+    sY.style.transform = 'translateX(' + p.x + 'px)';
+    ro.style.transform = 'translate(' + (p.x + 18) + 'px,' + (p.y + 16) + 'px)';
+    var xs = String(Math.round(p.x)).padStart(4, '0'), ys = String(Math.round(p.y)).padStart(4, '0');
+    ro.textContent = 'X ' + xs + ' · Y ' + ys;
+    cxy.textContent = xs + ' / ' + ys;
+    requestAnimationFrame(scan);
+  })();
+
+  /* -------------------------------------------------------------- content */
+  var PROJECTS = [
+    { t: 'Project One',   d: 'One line on what it is and who it is for.',      stack: ['TypeScript', 'Next.js', 'Postgres'], y: '2026', s: 'LIVE' },
+    { t: 'Project Two',   d: 'One line. Replace all of this with real work.',  stack: ['Python', 'Modal', 'Whisper'],        y: '2025', s: 'LIVE' },
+    { t: 'Project Three', d: 'One line. Rows expand as you add them.',         stack: ['Swift', 'CoreAudio'],                y: '2025', s: 'ARCHIVE' },
+    { t: 'Project Four',  d: 'One line. Status can be anything you like.',     stack: ['Go', 'Redis'],                       y: '2024', s: 'BUILDING' }
+  ];
+
+  var SKILLS = [
+    { g: 'Languages', items: [['TypeScript', 90], ['Python', 85], ['Go', 65], ['Swift', 55]] },
+    { g: 'Systems',   items: [['Distributed systems', 80], ['Databases', 75], ['Infra / deploy', 70], ['Security', 60]] },
+    { g: 'Creative',  items: [['Music production', 88], ['Sound design', 74], ['Motion / UI', 68], ['Photography', 52]] },
+    { g: 'Tools',     items: [['Next.js', 88], ['Postgres', 78], ['Docker', 72], ['Ableton', 90]] }
+  ];
+
+  (function buildProjects() {
+    var wrap = $('plist');
+    PROJECTS.forEach(function (p, i) {
+      var a = document.createElement('a');
+      a.className = 'pitem'; a.href = '#projects'; a.dataset.hover = 'OPEN';
+      a.innerHTML =
+        '<span class="n">' + String(i + 1).padStart(2, '0') + '</span>' +
+        '<span><span class="t">' + p.t + '</span><div class="d">' + p.d + '</div>' +
+        '<div class="stack">' + p.stack.map(function (s) { return '<em>' + s + '</em>'; }).join('') + '</div></span>' +
+        '<span class="meta"><b>' + p.s + '</b>' + p.y + '</span>';
+      wrap.appendChild(a);
+    });
+  })();
+
+  (function buildSkills() {
+    var wrap = $('skgrid');
+    SKILLS.forEach(function (g) {
+      var d = document.createElement('div');
+      d.className = 'skgroup';
+      d.innerHTML = '<h3>' + g.g + '</h3>' + g.items.map(function (it) {
+        return '<div class="skrow"><span class="nm">' + it[0] + '</span>' +
+               '<span class="mb"><i data-w="' + it[1] + '"></i></span></div>';
+      }).join('');
+      wrap.appendChild(d);
+    });
+  })();
+
+  /* --------------------------------------------------- name / Aurebesh flash
+     Latin for 3s, then the Star Wars glyph set for half a second, with a
+     hologram stutter on each swap. Pauses when Home is off-screen. */
+  var nameEl = $('nameGlyph');
+  var holoTimer = null, onHome = true;
+  // pull Aurebesh down before the first swap so it never flashes a fallback
+  if (document.fonts && document.fonts.load) document.fonts.load('60px Aurebesh');
+
+  function flick() {
+    nameEl.classList.remove('flicker');
+    void nameEl.offsetWidth;              // restart the animation
+    nameEl.classList.add('flicker');
+  }
+  function holoCycle() {
+    holoTimer = setTimeout(function () {
+      if (!onHome) { holoCycle(); return; }
+      flick();
+      setTimeout(function () { nameEl.classList.add('holo'); }, 80);
+      setTimeout(function () {
+        flick();
+        setTimeout(function () { nameEl.classList.remove('holo'); }, 80);
+        holoCycle();
+      }, 500);
+    }, 3000);
+  }
+  holoCycle();
+
+  /* -------------------------------------------------------------- routing */
+  var VIEWS = ['home', 'about', 'projects', 'skills', 'sound', 'contact'];
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#navlist a'));
+
+  function go(view, push) {
+    if (VIEWS.indexOf(view) === -1) view = 'home';
+    VIEWS.forEach(function (v) { $('v-' + v).classList.toggle('on', v === view); });
+    navLinks.forEach(function (a) { a.classList.toggle('active', a.dataset.view === view); });
+    $('curView').textContent = view.toUpperCase();
+    $('screen').scrollTop = 0;
+    onHome = view === 'home';
+    $('attitude').style.opacity = onHome ? '1' : '0';
+    document.title = view === 'home' ? 'Andrew Addo' : 'Andrew Addo — ' + view[0].toUpperCase() + view.slice(1);
+    if (view === 'skills') {
+      // let the bars grow in every time the view is entered
+      document.querySelectorAll('#skgrid .mb i').forEach(function (i) { i.style.width = '0'; });
+      setTimeout(function () {
+        document.querySelectorAll('#skgrid .mb i').forEach(function (i) { i.style.width = i.dataset.w + '%'; });
+      }, 60);
+    }
+    if (push && location.hash !== '#' + view) history.pushState(null, '', '#' + view);
+  }
+  document.addEventListener('click', function (e) {
+    var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
+    if (!a) return;
+    var v = a.getAttribute('href').slice(1);
+    if (VIEWS.indexOf(v) === -1) return;
+    e.preventDefault();
+    go(v, true);
+  });
+  window.addEventListener('popstate', function () { go(location.hash.slice(1), false); });
+  go(location.hash.slice(1) || 'home', false);
+
+  /* ----------------------------------------------------- clock + solar ---- */
+  var LAT = 41.7701, LON = -72.3051;
+  function solar(date) {
+    var start = new Date(date.getFullYear(), 0, 0);
+    var doy = Math.floor((date - start) / 864e5);
+    var decl = 0.4093 * Math.sin(2 * Math.PI * (doy - 81) / 365);
+    var cosH = -Math.tan(LAT * Math.PI / 180) * Math.tan(decl);
+    if (cosH > 1 || cosH < -1) return null;
+    var H = Math.acos(cosH) * 180 / Math.PI / 15;
+    var eot = 9.87 * Math.sin(4 * Math.PI * (doy - 81) / 365)
+            - 7.53 * Math.cos(2 * Math.PI * (doy - 81) / 365)
+            - 1.5 * Math.sin(2 * Math.PI * (doy - 81) / 365);
+    var noon = 12 - LON / 15 - eot / 60;
+    return { riseUTC: noon - H, setUTC: noon + H };
+  }
+  function toLocal(h, off) {
+    var v = (h + off + 24) % 24, hh = Math.floor(v), mm = Math.round((v - hh) * 60);
+    if (mm === 60) { hh = (hh + 1) % 24; mm = 0; }
+    return String(hh).padStart(2, '0') + ':' + String(mm).padStart(2, '0');
+  }
+  var arc = $('arc'), CIRC = 2 * Math.PI * 42;
+
+  S.createClock('America/New_York', function (c) {
+    $('hm').textContent = c.hour + ':' + c.minute;
+    $('ss').textContent = c.second;
+    $('dstr').textContent = c.weekday + ' · ' + c.month + ' ' + Number(c.day) + ' · ' + c.year;
+    $('tz').textContent = c.timeZoneName;
+    $('utc').textContent = new Date().toISOString().slice(11, 19);
+    $('dayPct').textContent = (c.dayFraction * 100).toFixed(1) + '%';
+    arc.setAttribute('stroke-dashoffset', CIRC * (1 - c.dayFraction));
+
+    var now = new Date();
+    var utcH = now.getUTCHours() + now.getUTCMinutes() / 60;
+    var locH = Number(c.hour) + Number(c.minute) / 60;
+    var off = Math.round(locH - utcH);
+    if (off > 12) off -= 24; if (off < -12) off += 24;
+    var s = solar(now);
+    if (s) { $('sunrise').textContent = toLocal(s.riseUTC, off); $('sunset').textContent = toLocal(s.setUTC, off); }
+  }, 250);
+
+  /* ------------------------------------------------------------- systems */
+  ['mSig', 'mArc', 'mPay'].forEach(function (id, i) {
+    var base = [86, 42, 67][i], node = $(id), out = node.parentElement.nextElementSibling;
+    setInterval(function () {
+      var v = Math.max(4, Math.min(99, base + (Math.random() * 6 - 3)));
+      node.style.width = v.toFixed(0) + '%'; out.textContent = v.toFixed(0) + '%';
+    }, 2600 + i * 900);
+  });
+  var LOGS = ['field stable', 'awaiting content payload', 'five transmissions cached',
+              'chronometer synced · america/new_york', 'parallax within tolerance', 'origin record locked'];
+  var li = 2, logEl = $('log');
+  setInterval(function () {
+    var d = document.createElement('div');
+    d.innerHTML = '<span>»</span>' + LOGS[li++ % LOGS.length];
+    logEl.appendChild(d);
+    while (logEl.children.length > 4) logEl.removeChild(logEl.firstChild);
+  }, 5200);
+
+  /* -------------------------------------------------------------- player */
+  var PLAY = 'M8 5v14l11-7z', PAUSE = 'M6 5h4v14H6zM14 5h4v14h-4z';
+  var st = { progress: 0, playing: false, index: 0 };
+
+  var player = S.createPlayer(window.TRACKS, { onState: function (s) {
+    st.progress = s.duration ? s.current / s.duration : 0;
+    st.playing = s.playing; st.index = s.index;
+
+    $('trkTitle').textContent = s.track.title;
+    $('trkCode').textContent = s.track.code;
+    $('tCur').textContent = S.fmtTime(s.current);
+    $('tDur').textContent = S.fmtTime(s.duration);
+    $('ppIcon').firstElementChild.setAttribute('d', s.playing ? PAUSE : PLAY);
+    $('feedTrk').textContent = s.playing ? s.track.code : 'IDLE';
+
+    $('sNow').textContent = (s.playing ? 'Now playing — ' : 'Cued — ') + s.track.title;
+    $('sCur').textContent = S.fmtTime(s.current);
+    $('sDur').textContent = S.fmtTime(s.duration);
+
+    Array.prototype.forEach.call($('txlist').children, function (b, i) { b.classList.toggle('on', i === s.index); });
+    Array.prototype.forEach.call($('tlist').children, function (b, i) {
+      b.classList.toggle('on', i === s.index);
+      b.classList.toggle('playing', i === s.index && s.playing);
+    });
+  }});
+
+  window.TRACKS.forEach(function (t, i) {
+    var b = document.createElement('button');
+    b.dataset.hover = 'CUE';
+    b.innerHTML = '<span class="n">' + String(i + 1).padStart(2, '0') + '</span><span>' + t.title +
+                  '</span><span class="d">' + t.code + '</span>';
+    b.onclick = function () { player.select(i); };
+    $('txlist').appendChild(b);
+
+    var r = document.createElement('button');
+    r.className = 'trow'; r.type = 'button'; r.dataset.hover = 'PLAY';
+    r.innerHTML =
+      '<span class="n">' + String(i + 1).padStart(2, '0') + '</span>' +
+      '<span class="pp"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>' +
+      '<span class="eq"><i></i><i></i><i></i></span>' +
+      '<span class="tt">' + t.title + '</span>' +
+      '<span class="cd">' + t.code + '</span>' +
+      '<span class="du" data-dur>--:--</span>';
+    r.onclick = function () { player.select(i); };
+    $('tlist').appendChild(r);
+
+    // read each file's duration once so the Sound list is populated up front
+    var probe = new Audio(); probe.preload = 'metadata'; probe.src = t.src;
+    probe.addEventListener('loadedmetadata', function () {
+      r.querySelector('[data-dur]').textContent = S.fmtTime(probe.duration);
+    });
+  });
+
+  $('toggle').onclick = function () { player.toggle(); };
+  $('next').onclick = function () { player.next(); };
+  $('prev').onclick = function () { player.prev(); };
+
+  /* ------------------------------------------------------------ waveforms */
+  var BARS = 72, shape = [];
+  for (var i = 0; i < BARS; i++) shape.push(0.18 + Math.abs(Math.sin(i * 0.63)) * 0.5 + Math.random() * 0.3);
+  var dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+  function wireWave(canvas, bars, playheadWidth) {
+    var cx = canvas.getContext('2d');
+    function size() {
+      canvas.width = canvas.clientWidth * dpr; canvas.height = canvas.clientHeight * dpr;
+      cx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    window.addEventListener('resize', size);
+    canvas.onclick = function (e) {
+      var r = canvas.getBoundingClientRect();
+      player.seek((e.clientX - r.left) / r.width);
+    };
+    return { ctx: cx, size: size, bars: bars, ph: playheadWidth };
+  }
+  var waves = [wireWave($('wave'), BARS, 1), wireWave($('bigwave'), 120, 1.5)];
+  setTimeout(function () { waves.forEach(function (w) { w.size(); }); }, 0);
+
+  (function drawWaves() {
+    var data = player.spectrum();
+    waves.forEach(function (w) {
+      var c = w.ctx.canvas, W = c.clientWidth, H = c.clientHeight;
+      if (!W || !H) return;
+      if (c.width !== Math.round(W * dpr)) w.size();   // view was hidden when we last sized it
+      w.ctx.clearRect(0, 0, W, H);
+      var n = w.bars, bw = W / n;
+      for (var i = 0; i < n; i++) {
+        var played = (i / n) < st.progress;
+        var v = shape[i % BARS];
+        if (data && st.playing) v = v * 0.4 + (data[Math.floor(Math.pow(i / (n - 1), 1.9) * (data.length - 1))] / 255) * 0.9;
+        var h = Math.max(1.5, v * H * 0.86);
+        w.ctx.fillStyle = played ? 'rgba(138,215,255,.85)' : 'rgba(138,215,255,.2)';
+        w.ctx.fillRect(i * bw, H / 2 - h / 2, Math.max(1, bw - 1.6), h);
+      }
+      w.ctx.fillStyle = 'rgba(251,191,36,.9)';
+      w.ctx.fillRect(st.progress * W - w.ph / 2, 0, w.ph, H);
+    });
+    requestAnimationFrame(drawWaves);
+  })();
+
+  /* ----------------------------------------------------------- contact -- */
+  $('cform').addEventListener('submit', function (e) {
+    e.preventDefault();
+    $('cnote').textContent = 'No endpoint yet — wire this to a form handler before launch';
+    $('cnote').style.color = 'var(--amber)';
+  });
+
+  /* ------------------------------------------------------- font modes ---
+     WorkySpace is a brush face: gorgeous large, ambiguous at 10px. These three
+     modes let you judge how far to push it. */
+  var FONT_MODES = [
+    ['hybrid', 'WorkySpace · mono numerals'],
+    ['all',    'WorkySpace everywhere'],
+    ['labels', 'WorkySpace display only']
+  ];
+  var fi = 0, toast = $('toast'), toastT;
+  function cycleFont() {
+    fi = (fi + 1) % FONT_MODES.length;
+    document.documentElement.dataset.font = FONT_MODES[fi][0];
+    toast.textContent = FONT_MODES[fi][1];
+    toast.classList.add('on');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { toast.classList.remove('on'); }, 1800);
+  }
+
+  /* -------------------------------------------------------- keyboard ---- */
+  document.addEventListener('keydown', function (e) {
+    var typing = /^(INPUT|TEXTAREA)$/.test(e.target.tagName);
+    if (e.code === 'Space' && !typing) { e.preventDefault(); player.toggle(); }
+    if (typing) return;
+    if (e.code === 'ArrowRight') player.next();
+    if (e.code === 'ArrowLeft') player.prev();
+    if (e.key === 'f' || e.key === 'F') cycleFont();
+  });
+})();
