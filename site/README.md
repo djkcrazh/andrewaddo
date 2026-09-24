@@ -94,6 +94,54 @@ Order and ties come from you; the **percentages are placeholders** picked to hon
 that order. Tune them in the `SKILLS` array at the top of `assets/site.js` and the bars
 and readouts follow.
 
+## Editing the text
+
+Everything is in `site/`. Three files hold every word on the page. (`mockups/` is the
+frozen exploration archive -- nothing there is live.)
+
+### `index.html` -- all page copy
+
+| what | where |
+|---|---|
+| Top strip label `ADDO//PORTFOLIO` | line ~467 |
+| Panel titles (Chronometer, Origin, Systems, Navigation, Transmission) | `<h2>` inside each `.panel` |
+| Coventry facts (Zone, Elevation, Founded, Signal) | just under `<h2>Origin` |
+| Home eyebrow `Deep field / observation` and the `Engineer * Artist` tagline | `<section id="v-home">` |
+| Each view's kicker, title and intro line | the `.vwhead` block at the top of every `<section class="vw">` |
+| About paragraphs + the Born/Based/Pronouns table | `<section id="v-about">` |
+| Contact channel labels, the `--` handles, form placeholders | `<section id="v-contact">` |
+| Resume caption | `.resume` inside `<section id="v-skills">` |
+| Footer hints | `<div class="foot">` at the bottom |
+
+Search for the section id (`v-about`, `v-projects`, `v-skills`, `v-sound`, `v-contact`)
+to jump to a view.
+
+### `assets/site.js` -- the list-shaped content
+
+Four arrays near the top, all plain data:
+
+| array | what |
+|---|---|
+| `PROJECTS` | title, one-liner, stack tags, year, status |
+| `SKILLS` | sections -> panels -> `['Name', percent]` |
+| `NAME` | the glitching name (`'Andrew Addo'`) |
+| `LOGS` | the scrolling lines in the Systems panel |
+
+### `assets/tracks.js` -- track titles and codes
+
+Five lines. Change `title` freely; leave `src` alone unless the filenames change.
+
+### Two rules when you write
+
+1. **No em dashes, en dashes, curly quotes or ellipses.** Naru Mono is a demo build and
+   draws a "LTS" watermark box for all of them. Use `--`, straight quotes `"` `'`, and
+   `...`. Watch out for word processors, which auto-curl quotes on paste -- type
+   directly into the file or paste through a plain-text editor.
+2. **`&middot;` is the interpunct** (`·`) used as a separator throughout, and
+   `&rarr;` is the arrow. Both render fine.
+
+After editing, just reload the browser. There is no build step.
+
 ## Placeholders
 
 - Projects and skills are dummy data in `assets/site.js` (`PROJECTS`, `SKILLS`).
