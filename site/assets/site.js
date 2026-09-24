@@ -429,8 +429,8 @@
      WorkySpace is a brush face: gorgeous large, ambiguous at 10px. These three
      modes let you judge how far to push it. */
   var FONT_MODES = [
-    ['naru',   'Naru everywhere but the name'],
-    ['panels', 'WorkySpace chrome + headings'],
+    ['naru',   'WorkySpace headings · Naru copy'],
+    ['panels', 'WorkySpace headings + panel labels'],
     ['worky',  'WorkySpace everywhere']
   ];
   var fi = 0, toast = $('toast'), toastT;

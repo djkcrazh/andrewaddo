@@ -41,16 +41,17 @@
   --display:'WorkySpace','Trebuchet MS',cursive;   /* the name + panel chrome */
   --mono:'NaruMono',ui-monospace,monospace;        /* everything you actually read */
 
-  /* Four roles the F key re-wires. --display (the name) never changes.
-     --title = headings/nav, --micro = panel labels, --prose = copy, --data = numerals */
-  --title:var(--mono);
+  /* Roles the F key re-wires. --display (the name) and --title (headings, nav,
+     track titles) stay WorkySpace; --micro = panel labels, --prose = copy,
+     --data = numerals. */
+  --title:var(--display);
   --prose:var(--mono);
   --micro:var(--mono);
   --data:var(--mono);
 }
-/* default: Naru everywhere but the name */
-html[data-font="naru"]{   --title:var(--mono);    --prose:var(--mono);    --micro:var(--mono);    --data:var(--mono); }
-/* WorkySpace keeps the chrome and the headings */
+/* default: WorkySpace for the name and every heading, Naru for what you read */
+html[data-font="naru"]{   --title:var(--display); --prose:var(--mono);    --micro:var(--mono);    --data:var(--mono); }
+/* WorkySpace also takes the panel labels */
 html[data-font="panels"]{ --title:var(--display); --prose:var(--mono);    --micro:var(--display); --data:var(--mono); }
 /* the original: WorkySpace on absolutely everything */
 html[data-font="worky"]{  --title:var(--display); --prose:var(--display); --micro:var(--display); --data:var(--display); }
@@ -167,7 +168,7 @@ html[data-theme="light"] .ico-sun{display:none}
 .arcwrap .lbl b{color:var(--ink);font-weight:400;font-family:var(--data);font-size:10px;margin-left:5px}
 
 .origin-link{display:block;text-decoration:none;color:inherit;cursor:none}
-.origin-link .name{font-family:var(--title);font-size:19px;letter-spacing:.005em;transition:color .3s;line-height:1.2}
+.origin-link .name{font-family:var(--title);font-size:23px;letter-spacing:.005em;transition:color .3s;line-height:1.2}
 .origin-link:hover .name{color:var(--blue)}
 .origin-link .go{font-family:var(--micro);font-size:10px;letter-spacing:.2em;color:var(--dim);margin-top:6px;text-transform:uppercase;
   display:flex;align-items:center;gap:6px;transition:.3s}
@@ -208,7 +209,7 @@ html[data-theme="light"] .ico-sun{display:none}
 /* --- section heading used by every non-home view --- */
 .vwhead{margin-bottom:30px}
 .vwhead .kick{font-family:var(--prose);font-size:9px;letter-spacing:.34em;color:var(--blue);text-transform:uppercase}
-.vwhead h2{font-family:var(--title);font-size:42px;font-weight:400;line-height:1.05;margin-top:12px;letter-spacing:.005em}
+.vwhead h2{font-family:var(--title);font-size:46px;font-weight:400;line-height:1.05;margin-top:12px;letter-spacing:.005em}
 .vwhead .lede{font-family:var(--prose);font-size:13.5px;color:var(--dim);margin-top:14px;max-width:62ch;line-height:1.85}
 
 /* --- HOME --- */
@@ -322,7 +323,7 @@ html[data-theme="light"] .ico-sun{display:none}
 .sksec{margin-bottom:34px}
 .sksec-h{display:flex;align-items:center;gap:14px;margin-bottom:15px}
 .sksec-h .sn{font-family:var(--prose);font-size:9px;letter-spacing:.24em;color:var(--blue)}
-.sksec-h h3{font-family:var(--title);font-size:27px;font-weight:400;letter-spacing:.01em;color:var(--ink)}
+.sksec-h h3{font-family:var(--title);font-size:30px;font-weight:400;letter-spacing:.01em;color:var(--ink)}
 .sksec-h .rule{flex:1;height:1px;background:linear-gradient(90deg,var(--line2),transparent)}
 .skpanel{border:1px solid var(--line);background:var(--tint);padding:17px 20px 14px;margin-bottom:12px;position:relative}
 .skpanel::before{content:'';position:absolute;left:-1px;top:-1px;width:6px;height:6px;
@@ -399,7 +400,7 @@ html[data-theme="light"] .ico-sun{display:none}
 .navlist{display:flex;flex-direction:column}
 .navlist a{
   display:flex;align-items:center;gap:12px;padding:9px 6px;text-decoration:none;color:var(--dim);
-  border-bottom:1px solid rgba(var(--accent-rgb),.07);font-family:var(--title);font-size:14px;letter-spacing:.02em;cursor:none;transition:.26s;
+  border-bottom:1px solid rgba(var(--accent-rgb),.07);font-family:var(--title);font-size:16px;letter-spacing:.02em;cursor:none;transition:.26s;
 }
 .navlist a:last-child{border-bottom:0}
 .navlist a .n{font-family:var(--data);font-size:9px;letter-spacing:.1em;opacity:.55}
@@ -413,7 +414,7 @@ html[data-theme="light"] .ico-sun{display:none}
 .tx{flex:1;display:flex;flex-direction:column;min-height:0}
 .wave{height:42px;width:100%;margin-bottom:10px;cursor:none}
 .txhead{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
-.txhead .t{font-family:var(--title);font-size:16px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.txhead .t{font-family:var(--title);font-size:19px;color:var(--white);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .txhead .c{font-family:var(--data);font-size:9px;color:var(--dim);letter-spacing:.14em;flex:0 0 auto;margin-left:10px}
 .txctrl{display:flex;align-items:center;gap:7px;padding:10px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
 .txctrl button{width:28px;height:28px;border:1px solid var(--line);background:transparent;color:var(--ink);
@@ -425,7 +426,7 @@ html[data-theme="light"] .ico-sun{display:none}
 .txlist::-webkit-scrollbar{width:3px}
 .txlist::-webkit-scrollbar-thumb{background:var(--line2)}
 .txlist button{width:100%;display:flex;align-items:center;gap:10px;padding:7px 6px;border:0;background:transparent;
-  color:var(--dim);font-family:var(--title);font-size:12px;letter-spacing:.02em;text-align:left;cursor:none;transition:.2s}
+  color:var(--dim);font-family:var(--title);font-size:13px;letter-spacing:.02em;text-align:left;cursor:none;transition:.2s}
 .txlist button:hover{background:rgba(var(--accent-rgb),.06);color:var(--ink)}
 .txlist button.on{color:var(--blue)}
 .txlist button .n{opacity:.5;width:18px;flex:0 0 18px;font-family:var(--data);font-size:9px}

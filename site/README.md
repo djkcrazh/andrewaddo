@@ -43,17 +43,28 @@ All copy currently uses `--`, straight quotes and `·` instead. Keep doing that,
 the full family (link in `assets/fonts/NaruMono-README.txt`). Arrows (→ ← ↑ ↓), `·`,
 `°`, `%`, `»`, `«` all render fine.
 
-### Press F to re-wire the four font roles
+### Press F to re-wire the font roles
 
-`--display` (your name) is always WorkySpace. The other three move:
+`--display` (your name) and `--title` (headings, nav, the Origin panel name, the
+Transmission track titles) are always WorkySpace. The rest moves:
 
-| mode | headings/nav | panel labels | copy + numerals |
-|---|---|---|---|
-| `naru` *(default)* | Naru | Naru | Naru |
-| `panels` | WorkySpace | WorkySpace | Naru |
-| `worky` | WorkySpace | WorkySpace | WorkySpace |
+| mode | panel labels | copy + numerals |
+|---|---|---|
+| `naru` *(default)* | Naru | Naru |
+| `panels` | WorkySpace | Naru |
+| `worky` | WorkySpace | WorkySpace |
 
-Set the default via `data-font` on `<html>` in `index.html`.
+**WorkySpace currently holds:** the name; every view title (About, Projects, Skills,
+Sound, Contact); the Skills section headers (Engineer, Artist); all six nav labels;
+"Coventry, Connecticut"; and the track titles in the Transmission panel.
+
+**Naru holds:** body copy, panel micro-labels, skill names, project descriptions,
+contact rows, form fields, and every numeral.
+
+Widen WorkySpace's reach by moving an element's `font-family` from `var(--prose)` to
+`var(--title)` in `index.html`. The obvious next candidates are project titles
+(`.pitem .t`), the Sound track rows (`.trow .tt`), and the contact values
+(`.chan a .v`). Set the default mode via `data-font` on `<html>`.
 
 ### The name glitch
 

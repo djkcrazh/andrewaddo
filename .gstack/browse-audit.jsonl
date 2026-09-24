@@ -214,3 +214,13 @@
 {"ts":"2026-09-24T23:00:32.650Z","cmd":"click","args":"a[data-view=about]","origin":"http://localhost:8743/#about","durationMs":45,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-09-24T23:00:34.838Z","cmd":"screenshot","args":"--viewport /tmp/p-about-dark.png","origin":"http://localhost:8743/#about","durationMs":127,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-09-24T23:00:34.886Z","cmd":"console","args":"--errors","origin":"http://localhost:8743/#about","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T23:06:47.401Z","cmd":"goto","args":"http://localhost:8743/","origin":"http://localhost:8743/","durationMs":392,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T23:07:02.621Z","cmd":"reload","args":"","origin":"http://localhost:8743/","durationMs":15030,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T23:07:06.019Z","cmd":"console","args":"--errors","origin":"http://localhost:8743/","durationMs":4,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T23:07:08.417Z","cmd":"click","args":"a[data-view=skills]","origin":"http://localhost:8743/#skills","durationMs":2193,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T23:07:10.728Z","cmd":"screenshot","args":"--viewport /tmp/w-skills.png","origin":"http://localhost:8743/#skills","durationMs":188,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T23:07:20.757Z","cmd":"click","args":"a[data-view=about]","origin":"http://localhost:8743/#about","durationMs":81,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T23:07:23.369Z","cmd":"screenshot","args":"--viewport /tmp/w-about.png","origin":"http://localhost:8743/#about","durationMs":236,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T23:07:23.654Z","cmd":"click","args":"a[data-view=home]","origin":"http://localhost:8743/#home","durationMs":71,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T23:07:26.058Z","cmd":"screenshot","args":"--viewport /tmp/w-home.png","origin":"http://localhost:8743/#home","durationMs":267,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T23:07:26.312Z","cmd":"console","args":"--errors","origin":"http://localhost:8743/#home","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
