@@ -43,17 +43,17 @@ All copy currently uses `--`, straight quotes and `·` instead. Keep doing that,
 the full family (link in `assets/fonts/NaruMono-README.txt`). Arrows (→ ← ↑ ↓), `·`,
 `°`, `%`, `»`, `«` all render fine.
 
-### Press F to re-wire the three font roles
+### Press F to re-wire the four font roles
 
-| mode | centre screen | panel labels | numerals |
+`--display` (your name) is always WorkySpace. The other three move:
+
+| mode | headings/nav | panel labels | copy + numerals |
 |---|---|---|---|
-| `panels` *(default)* | Naru | WorkySpace | Naru |
-| `naru` | Naru | Naru | Naru |
+| `naru` *(default)* | Naru | Naru | Naru |
+| `panels` | WorkySpace | WorkySpace | Naru |
 | `worky` | WorkySpace | WorkySpace | WorkySpace |
 
-`panels` is what is asked for: the name and the dashboard chrome stay WorkySpace,
-everything you actually read is Naru. `naru` also fixes the panel labels, where
-WorkySpace turns `LAT` into `CAT`. Set the default via `data-font` on `<html>`.
+Set the default via `data-font` on `<html>` in `index.html`.
 
 ### The name glitch
 
@@ -70,6 +70,29 @@ Aurebesh runs 1.43x wider than WorkySpace at the same size, so it renders at `.7
 to keep the swap from shoving the layout. Honours `prefers-reduced-motion`, and the
 loop idles while Home is off-screen. Tuning lives at the top of the name block in
 `assets/site.js` (`NAME`, `POOL`, `GLITCH_MS`) and in the `g*` keyframes in `index.html`.
+
+## Light mode
+
+The sun/moon button at the right of the header strip. Sun = you are in dark, click for
+light; moon = the reverse. The choice persists in `localStorage` under `addo-theme`.
+
+One lever does the whole theme: `--accent-rgb` and `--void-rgb` in `index.html`, since
+every border, tint, track, glow and hairline is derived from them. The two `<canvas>`
+layers paint their own pixels and cannot read a CSS variable, so `applyTheme()` in
+`assets/site.js` hands them a palette: in light mode the starfield inverts to ink
+specks on paper and the cursor spotlight switches from `screen` to `multiply`, casting
+a soft shadow instead of a glow.
+
+## Skills
+
+Two sections, three panels, stacked vertically in the scrolling screen:
+
+- **Engineer** -> Languages (7), Frameworks & Libraries (4)
+- **Artist** -> Music & Performance (5)
+
+Order and ties come from you; the **percentages are placeholders** picked to honour
+that order. Tune them in the `SKILLS` array at the top of `assets/site.js` and the bars
+and readouts follow.
 
 ## Placeholders
 

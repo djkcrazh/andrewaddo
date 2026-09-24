@@ -32,6 +32,7 @@
       opts.ripple || {}
     );
     var shooting = opts.shooting || null;               // {every:[min,max], speed, len}
+    var alphaBoost = 1;                                 // light mode needs darker specks to read
 
     var dpr = Math.min(global.devicePixelRatio || 1, 2);
     var W = 0, H = 0;
@@ -114,7 +115,7 @@
 
         var alpha = s.a;
         if (twinkle) alpha *= 0.62 + 0.38 * Math.sin(t * s.tw + s.phase);
-        alpha = clamp(alpha + boost * 0.9, 0, 1);
+        alpha = clamp(alpha * alphaBoost + boost * 0.9, 0, 1);
 
         ctx.globalAlpha = alpha;
         ctx.fillStyle = s.color;
@@ -180,6 +181,17 @@
 
     return {
       ripple: function (x, y) { ripples.push({ x: x, y: y, t: performance.now() }); },
+      // recolour a live field without rebuilding it — used by the theme toggle
+      setPalette: function (opts) {
+        if (opts.layers) {
+          stars.forEach(function (s) {
+            if (opts.layers[s.layer]) s.color = opts.layers[s.layer];
+          });
+        }
+        if (opts.ringColor) rippleCfg.ringColor = opts.ringColor;
+        if (opts.ringAlpha != null) rippleCfg.ringAlpha = opts.ringAlpha;
+        if (opts.alphaBoost != null) alphaBoost = opts.alphaBoost;
+      },
       destroy: function () { cancelAnimationFrame(raf); }
     };
   }
@@ -233,7 +245,16 @@
     global.addEventListener('mousemove', function (e) { tx = e.clientX; ty = e.clientY; }, { passive: true });
     document.addEventListener('mouseleave', function () { tx = -2000; ty = -2000; });
     raf = requestAnimationFrame(draw);
-    return { destroy: function () { cancelAnimationFrame(raf); } };
+    return {
+      setConfig: function (c) {
+        if (c.color) { config.color = c.color; rgb = hexToRgb(c.color); }
+        if (c.brightness != null) config.brightness = c.brightness;
+        if (c.radius != null) config.radius = c.radius;
+        // on a light background 'screen' is a no-op; 'multiply' casts a soft shadow
+        if (c.blend) { config.blend = c.blend; canvas.style.mixBlendMode = c.blend; }
+      },
+      destroy: function () { cancelAnimationFrame(raf); }
+    };
   }
 
   /* --------------------------------------------------------------------------

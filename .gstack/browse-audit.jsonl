@@ -151,3 +151,40 @@
 {"ts":"2026-09-24T01:05:17.253Z","cmd":"screenshot","args":"--viewport /tmp/n-about.png","origin":"http://localhost:8743/#about","durationMs":98,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-09-24T01:05:19.325Z","cmd":"click","args":"a[data-view=projects]","origin":"http://localhost:8743/#projects","durationMs":2033,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-09-24T01:05:21.465Z","cmd":"screenshot","args":"--viewport /tmp/n-projects.png","origin":"http://localhost:8743/#projects","durationMs":93,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:48:56.453Z","cmd":"viewport","args":"1440x900","origin":"about:blank","durationMs":5,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:48:56.639Z","cmd":"goto","args":"http://localhost:8743/","origin":"http://localhost:8743/","durationMs":144,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:49:11.713Z","cmd":"reload","args":"","origin":"http://localhost:8743/","durationMs":15002,"status":"error","hasCookies":false,"mode":"launched","error":"reload: Timeout 15000ms exceeded.\nCall log:\n  - waiting for navigation until \"domcontentloaded\"\n"}
+{"ts":"2026-09-24T22:49:15.763Z","cmd":"console","args":"--errors","origin":"http://localhost:8743/","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:49:15.804Z","cmd":"js","args":"JSON.stringify({font:document.documentElement.dataset.font,theme:document.documentElement.dataset.theme||'dark',tags:document.querySelector('.tags').textContent.trim(),sweep:document.querySelectorAll(…","origin":"http://localhost:8743/","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:49:19.722Z","cmd":"screenshot","args":"--viewport /tmp/t-home-dark.png","origin":"http://localhost:8743/","durationMs":94,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:49:21.854Z","cmd":"click","args":"#themeBtn","origin":"http://localhost:8743/","durationMs":2092,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:49:23.905Z","cmd":"js","args":"JSON.stringify({theme:document.documentElement.dataset.theme,lbl:document.getElementById('themeLbl').textContent})","origin":"http://localhost:8743/","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:49:24.041Z","cmd":"screenshot","args":"--viewport /tmp/t-home-light.png","origin":"http://localhost:8743/","durationMs":93,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:49:49.409Z","cmd":"reload","args":"","origin":"http://localhost:8743/","durationMs":66,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:49:55.519Z","cmd":"click","args":"a[data-view=skills]","origin":"http://localhost:8743/#skills","durationMs":2049,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:49:57.675Z","cmd":"screenshot","args":"--viewport /tmp/t-skills-light.png","origin":"http://localhost:8743/#skills","durationMs":102,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:49:57.715Z","cmd":"console","args":"--errors","origin":"http://localhost:8743/#skills","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:50:10.496Z","cmd":"reload","args":"","origin":"http://localhost:8743/#skills","durationMs":17,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:50:15.614Z","cmd":"click","args":"a[data-view=skills]","origin":"http://localhost:8743/#skills","durationMs":2041,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:50:17.270Z","cmd":"js","args":"document.getElementById('screen').scrollTop=520;'ok'","origin":"http://localhost:8743/#skills","durationMs":6,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:50:18.427Z","cmd":"screenshot","args":"--viewport /tmp/t-skills-b.png","origin":"http://localhost:8743/#skills","durationMs":107,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:50:20.673Z","cmd":"click","args":"a[data-view=contact]","origin":"http://localhost:8743/#contact","durationMs":2071,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:50:22.858Z","cmd":"screenshot","args":"--viewport /tmp/t-contact-light.png","origin":"http://localhost:8743/#contact","durationMs":127,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:50:52.804Z","cmd":"reload","args":"","origin":"http://localhost:8743/#contact","durationMs":63,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:50:57.932Z","cmd":"click","args":"#themeBtn","origin":"http://localhost:8743/#contact","durationMs":2046,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:01.018Z","cmd":"click","args":"a[data-view=contact]","origin":"http://localhost:8743/#contact","durationMs":2035,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:03.164Z","cmd":"screenshot","args":"--viewport /tmp/t-contact-dark.png","origin":"http://localhost:8743/#contact","durationMs":94,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:03.212Z","cmd":"js","args":"document.documentElement.dataset.theme||'dark'","origin":"http://localhost:8743/#contact","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:14.751Z","cmd":"click","args":"a[data-view=home]","origin":"http://localhost:8743/#home","durationMs":46,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:16.801Z","cmd":"eval","args":"/tmp/freeze.js","origin":"http://localhost:8743/#home","durationMs":3,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:17.250Z","cmd":"screenshot","args":"--selector #nameGlyph /tmp/t-glitch-dark.png","origin":"http://localhost:8743/#home","durationMs":449,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:17.250Z","cmd":"chain","args":"[[\"eval\",\"/tmp/freeze.js\"],[\"screenshot\",\"--selector\",\"#nameGlyph\",\"/tmp/t-glitch-dark.png\"]]","origin":"http://localhost:8743/#home","durationMs":452,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:17.315Z","cmd":"reload","args":"","origin":"http://localhost:8743/#home","durationMs":29,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:22.414Z","cmd":"click","args":"#themeBtn","origin":"http://localhost:8743/#home","durationMs":2036,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:23.466Z","cmd":"eval","args":"/tmp/freeze.js","origin":"http://localhost:8743/#home","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:23.547Z","cmd":"screenshot","args":"--selector #nameGlyph /tmp/t-glitch-light.png","origin":"http://localhost:8743/#home","durationMs":81,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:23.547Z","cmd":"chain","args":"[[\"eval\",\"/tmp/freeze.js\"],[\"screenshot\",\"--selector\",\"#nameGlyph\",\"/tmp/t-glitch-light.png\"]]","origin":"http://localhost:8743/#home","durationMs":82,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:32.370Z","cmd":"reload","args":"","origin":"http://localhost:8743/#home","durationMs":8788,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:37.505Z","cmd":"click","args":"#toggle","origin":"http://localhost:8743/#home","durationMs":2071,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:41.551Z","cmd":"js","args":"JSON.stringify({t:document.getElementById('tCur').textContent,feed:document.getElementById('feedTrk').textContent,theme:document.documentElement.dataset.theme||'dark'})","origin":"http://localhost:8743/#home","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-24T22:51:41.588Z","cmd":"console","args":"--errors","origin":"http://localhost:8743/#home","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}

@@ -8,7 +8,7 @@
   var $ = function (id) { return document.getElementById(id); };
 
   /* ---------------------------------------------------------------- field */
-  S.createStarfield($('stars'), {
+  var field = S.createStarfield($('stars'), {
     parallax: 20,
     drift: { x: -1.1, y: .25 },
     layers: [
@@ -18,7 +18,7 @@
     ],
     ripple: { speed: 700, width: 38, amplitude: 26, life: 1.6, ringColor: '138,215,255', ringAlpha: .2 }
   });
-  S.createSpotlight($('spot'), { radius: 220, brightness: .07, color: '#8ad7ff', smoothing: .2 });
+  var spot = S.createSpotlight($('spot'), { radius: 220, brightness: .07, color: '#8ad7ff', smoothing: .2 });
 
   var cur = S.createCursor({
     smoothing: .3, ringSmoothing: .16, magnet: false, ringRotate: false,
@@ -45,11 +45,24 @@
     { t: 'Project Four',  d: 'One line. Status can be anything you like.',     stack: ['Go', 'Redis'],                       y: '2024', s: 'BUILDING' }
   ];
 
+  /* Levels are placeholders chosen to honour the order and ties you gave --
+     tune the numbers here, the bars and readouts follow. */
   var SKILLS = [
-    { g: 'Languages', items: [['TypeScript', 90], ['Python', 85], ['Go', 65], ['Swift', 55]] },
-    { g: 'Systems',   items: [['Distributed systems', 80], ['Databases', 75], ['Infra / deploy', 70], ['Security', 60]] },
-    { g: 'Creative',  items: [['Music production', 88], ['Sound design', 74], ['Motion / UI', 68], ['Photography', 52]] },
-    { g: 'Tools',     items: [['Next.js', 88], ['Postgres', 78], ['Docker', 72], ['Ableton', 90]] }
+    { section: 'Engineer', panels: [
+      { g: 'Languages', items: [
+        ['Python', 94], ['Java', 86], ['R', 80],
+        ['TypeScript', 74], ['JavaScript', 70], ['SQL', 63], ['MATLAB', 55]
+      ]},
+      { g: 'Frameworks & Libraries', items: [
+        ['React', 88], ['Next.js', 79], ['NumPy', 68], ['Matplotlib', 68]
+      ]}
+    ]},
+    { section: 'Artist', panels: [
+      { g: 'Music & Performance', items: [
+        ['Music Production', 93], ['Sound Design', 82],
+        ['Jazz Piano', 71], ['Classical Piano', 71], ['Percussion', 44]
+      ]}
+    ]}
   ];
 
   (function buildProjects() {
@@ -67,15 +80,25 @@
   })();
 
   (function buildSkills() {
-    var wrap = $('skgrid');
-    SKILLS.forEach(function (g) {
-      var d = document.createElement('div');
-      d.className = 'skgroup';
-      d.innerHTML = '<h3>' + g.g + '</h3>' + g.items.map(function (it) {
-        return '<div class="skrow"><span class="nm">' + it[0] + '</span>' +
-               '<span class="mb"><i data-w="' + it[1] + '"></i></span></div>';
-      }).join('');
-      wrap.appendChild(d);
+    var wrap = $('skstack');
+    SKILLS.forEach(function (sec, si) {
+      var block = document.createElement('div');
+      block.className = 'sksec';
+      block.innerHTML = '<div class="sksec-h"><span class="sn">' +
+        String(si + 1).padStart(2, '0') + '</span><h3>' + sec.section + '</h3><span class="rule"></span></div>';
+
+      sec.panels.forEach(function (pan) {
+        var d = document.createElement('div');
+        d.className = 'skpanel';
+        d.innerHTML = '<h4><span>' + pan.g + '</span><em>' + pan.items.length + '</em></h4>' +
+          pan.items.map(function (it) {
+            return '<div class="skrow"><span class="nm">' + it[0] + '</span>' +
+                   '<span class="mb"><i data-w="' + it[1] + '"></i></span>' +
+                   '<span class="pc">' + it[1] + '%</span></div>';
+          }).join('');
+        block.appendChild(d);
+      });
+      wrap.appendChild(block);
     });
   })();
 
@@ -174,9 +197,9 @@
     document.title = view === 'home' ? 'Andrew Addo' : 'Andrew Addo — ' + view[0].toUpperCase() + view.slice(1);
     if (view === 'skills') {
       // let the bars grow in every time the view is entered
-      document.querySelectorAll('#skgrid .mb i').forEach(function (i) { i.style.width = '0'; });
+      document.querySelectorAll('#skstack .mb i').forEach(function (i) { i.style.width = '0'; });
       setTimeout(function () {
-        document.querySelectorAll('#skgrid .mb i').forEach(function (i) { i.style.width = i.dataset.w + '%'; });
+        document.querySelectorAll('#skstack .mb i').forEach(function (i) { i.style.width = i.dataset.w + '%'; });
       }, 60);
     }
     if (push && location.hash !== '#' + view) history.pushState(null, '', '#' + view);
@@ -308,6 +331,7 @@
   $('prev').onclick = function () { player.prev(); };
 
   /* ------------------------------------------------------------ waveforms */
+  var WAVE = { on: '', off: '', head: '' };
   var BARS = 72, shape = [];
   for (var i = 0; i < BARS; i++) shape.push(0.18 + Math.abs(Math.sin(i * 0.63)) * 0.5 + Math.random() * 0.3);
   var dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -341,10 +365,10 @@
         var v = shape[i % BARS];
         if (data && st.playing) v = v * 0.4 + (data[Math.floor(Math.pow(i / (n - 1), 1.9) * (data.length - 1))] / 255) * 0.9;
         var h = Math.max(1.5, v * H * 0.86);
-        w.ctx.fillStyle = played ? 'rgba(138,215,255,.85)' : 'rgba(138,215,255,.2)';
+        w.ctx.fillStyle = played ? WAVE.on : WAVE.off;
         w.ctx.fillRect(i * bw, H / 2 - h / 2, Math.max(1, bw - 1.6), h);
       }
-      w.ctx.fillStyle = 'rgba(251,191,36,.9)';
+      w.ctx.fillStyle = WAVE.head;
       w.ctx.fillRect(st.progress * W - w.ph / 2, 0, w.ph, H);
     });
     requestAnimationFrame(drawWaves);
@@ -357,12 +381,56 @@
     $('cnote').style.color = 'var(--amber)';
   });
 
+  /* ----------------------------------------------------------- theme ----
+     One lever: --accent-rgb / --void-rgb in CSS, plus the two canvases, which
+     paint their own pixels and so cannot inherit a custom property. */
+  var THEMES = {
+    dark: {
+      stars: ['#ffffff', '#cfe6ff', '#8ad7ff'],
+      ring: '138,215,255', ringAlpha: .2, alphaBoost: 1,
+      spot: { color: '#8ad7ff', brightness: .07, blend: 'screen' },
+      wave: { on: 'rgba(138,215,255,.85)', off: 'rgba(138,215,255,.2)', head: 'rgba(251,191,36,.9)' },
+      label: 'Light'
+    },
+    light: {
+      // ink specks on paper rather than stars on void
+      stars: ['#4a6a84', '#274457', '#0b688c'],
+      ring: '11,104,140', ringAlpha: .32, alphaBoost: 1.45,
+      spot: { color: '#0b688c', brightness: .1, blend: 'multiply' },
+      wave: { on: 'rgba(11,104,140,.85)', off: 'rgba(11,104,140,.22)', head: 'rgba(150,86,10,.9)' },
+      label: 'Dark'
+    }
+  };
+
+  var themeBtn = $('themeBtn'), themeLbl = $('themeLbl');
+
+  function applyTheme(name, persist) {
+    var t = THEMES[name] || THEMES.dark;
+    if (name === 'light') document.documentElement.dataset.theme = 'light';
+    else document.documentElement.removeAttribute('data-theme');
+
+    field.setPalette({ layers: t.stars, ringColor: t.ring, ringAlpha: t.ringAlpha, alphaBoost: t.alphaBoost });
+    spot.setConfig(t.spot);
+    WAVE.on = t.wave.on; WAVE.off = t.wave.off; WAVE.head = t.wave.head;
+    themeLbl.textContent = t.label;
+    themeBtn.setAttribute('aria-label', 'Switch to ' + t.label.toLowerCase() + ' mode');
+    if (persist) { try { localStorage.setItem('addo-theme', name); } catch (e) {} }
+  }
+
+  var savedTheme = 'dark';
+  try { savedTheme = localStorage.getItem('addo-theme') || 'dark'; } catch (e) {}
+  applyTheme(savedTheme, false);
+
+  themeBtn.addEventListener('click', function () {
+    applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light', true);
+  });
+
   /* ------------------------------------------------------- font modes ---
      WorkySpace is a brush face: gorgeous large, ambiguous at 10px. These three
      modes let you judge how far to push it. */
   var FONT_MODES = [
-    ['panels', 'Naru on screen · WorkySpace panels'],
     ['naru',   'Naru everywhere but the name'],
+    ['panels', 'WorkySpace chrome + headings'],
     ['worky',  'WorkySpace everywhere']
   ];
   var fi = 0, toast = $('toast'), toastT;
