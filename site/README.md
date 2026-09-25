@@ -221,11 +221,63 @@ After editing, just reload the browser. There is no build step.
 
 ## Vercel
 
-This deploys as a plain static site — no server needed. The clock, the starfield and
-the audio all run in the browser, so a static host serves them fine; there is nothing
-to render server-side. `vercel deploy` from the repo root with `site/` as the output
-directory is enough.
+The repo is deploy-ready. Push to the connected branch and it builds.
 
-If you want the React/Tailwind port later, the five factories in `assets/core.js`
-(`createStarfield`, `createSpotlight`, `createCursor`, `createClock`, `createPlayer`)
-each wrap into one `useEffect`, and the six views become routes.
+### How it is wired
+
+`vercel.json` at the **repo root** sets `outputDirectory: "site"`, so leave the
+project's Root Directory at the default `./`. There is no build step -- Vercel
+just serves `site/`. `mockups/` never ships.
+
+If you would rather set Root Directory to `site` in the dashboard, move
+`vercel.json` into `site/` and delete the `outputDirectory` line, or the path
+resolves twice and the deploy 404s.
+
+### Fix these two URLs before you share the link
+
+`index.html` has `canonical`, `og:url` and `og:image` hardcoded to
+`https://andrewaddo.vercel.app/`. **That is a guess.** Once you know the real
+domain, search-replace it. Wrong values mean the social preview silently breaks
+on every share, with no error anywhere.
+
+`assets/images/og.png` is a 1200x630 shot of the home screen. Regenerate it if
+the design changes.
+
+### Audio
+
+The WAV masters are 116 MB -- too big for git and pointless to ship. They are
+transcoded to 192k AAC (`.m4a`, 16 MB total) and committed. Masters stay in
+`~/Projects/portfolio/Music/`. To replace a track:
+
+```bash
+afconvert -f m4af -d aac -b 192000 -q 127 -s 2 master.wav site/assets/audio/name.m4a
+afinfo site/assets/audio/name.m4a | grep duration    # put the seconds in tracks.js
+```
+
+`vercel.json` pins `.m4a` to `Content-Type: audio/mp4`. Some servers map it to
+`audio/mp4a-latm`, which browsers refuse to decode -- the file downloads fine
+and simply never plays, with no console error.
+
+### Local preview
+
+```bash
+python3 serve.py          # http://localhost:8743
+```
+
+Use this rather than `python3 -m http.server`. On macOS Python reads Apache's
+mime.types and serves `.m4a` as the unplayable `audio/mp4a-latm`; `serve.py`
+pins the same types Vercel does, so local matches production.
+
+### Caching
+
+Fonts, audio and images are `immutable` for a year. JS is `must-revalidate`
+because the filenames are not content-hashed -- if you ever add hashing, switch
+JS to immutable too.
+
+## Known gaps
+
+- **Fonts ship uncompressed**: 660 KB across three OTF/TTF files. woff2 would cut
+  that ~60%, but needs `fonttools`, which is not installed. `pip install fonttools
+  brotli` then `pyftsubset` to subset Latin and convert.
+- Desktop only. Below ~1100px the dashboard needs a real mobile pass.
+- The contact form has no spam rate-limit beyond the `_gotcha` honeypot.

@@ -341,15 +341,11 @@
       '<span class="eq"><i></i><i></i><i></i></span>' +
       '<span class="tt">' + t.title + '</span>' +
       '<span class="cd">' + t.code + '</span>' +
-      '<span class="du" data-dur>--:--</span>';
+      '<span class="du" data-dur>' + (t.dur ? S.fmtTime(t.dur) : '--:--') + '</span>';
     r.onclick = function () { player.select(i); };
     $('tlist').appendChild(r);
 
-    // read each file's duration once so the Sound list is populated up front
-    var probe = new Audio(); probe.preload = 'metadata'; probe.src = t.src;
-    probe.addEventListener('loadedmetadata', function () {
-      r.querySelector('[data-dur]').textContent = S.fmtTime(probe.duration);
-    });
+    // duration comes from tracks.js -- see the note there on why we do not probe
   });
 
   $('toggle').onclick = function () { player.toggle(); };
