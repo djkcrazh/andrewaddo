@@ -100,6 +100,34 @@ copy in our own type.
 The `action` attribute is the single source of truth for the endpoint; `site.js` reads
 it off the form. To swap providers, change the attribute.
 
+## Links
+
+`externalise()` in `assets/site.js` runs once at boot and sets
+`target="_blank" rel="noopener noreferrer"` on every `<a>` **except**:
+
+- `href="#..."` -- the dashboard's own routing (nav, the Origin panel's
+  "Coventry, Connecticut / Explore"). These stay in-tab.
+- `mailto:` and `tel:` -- these hand off to the OS, and a new tab would just
+  leave an empty one behind.
+
+So anything that leaves the site opens beside it and the clock, starfield and
+whatever is playing all survive the click. Add a link anywhere and it is covered
+automatically; no need to remember the attribute.
+
+## Text contrast
+
+Every text style clears WCAG AA (4.5:1) in both themes, measured against the
+composited panel background rather than the raw `--void`. Lowest are the 9px
+codes at ~5:1. The two greys that do the work:
+
+| | dark | light |
+|---|---|---|
+| `--dim` (labels, ledes, footer) | `#8797aa` | `#3f5568` |
+| `--body-ink` (prose) | `#ccd7e3` | `#22394b` |
+
+If you darken either, re-check: at the previous values the page intro, log lines
+and strip labels all sat near 4:1, and the 9px track codes were at 2.5:1.
+
 ## Light mode
 
 The sun/moon button at the right of the header strip. Sun = you are in dark, click for

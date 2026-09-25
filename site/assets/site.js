@@ -196,6 +196,22 @@
     }, isAure ? 500 + GLITCH_MS : 3000);
   })();
 
+  /* ----------------------------------------------------------- new tabs ---
+     Anything that leaves the dashboard opens in its own tab, so the clock,
+     the starfield and whatever is playing all survive the click. In-page
+     routing (#about) and OS handoffs (mailto:, tel:) are left alone. */
+  function externalise(root) {
+    var links = (root || document).querySelectorAll('a[href]');
+    Array.prototype.forEach.call(links, function (a) {
+      var href = a.getAttribute('href') || '';
+      if (href.charAt(0) === '#') return;
+      if (/^(mailto|tel|javascript):/i.test(href)) return;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+    });
+  }
+  externalise();
+
   /* -------------------------------------------------------------- routing */
   var VIEWS = ['home', 'about', 'projects', 'skills', 'sound', 'contact'];
   var navLinks = Array.prototype.slice.call(document.querySelectorAll('#navlist a'));
