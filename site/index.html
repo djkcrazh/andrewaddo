@@ -393,7 +393,14 @@ html[data-theme="light"] .ico-sun{display:none}
 .cform input:focus,.cform textarea:focus{border-color:var(--blue);background:var(--tint2)}
 .cform input::placeholder,.cform textarea::placeholder{color:var(--dim);font-family:var(--prose);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
 .cform textarea{min-height:110px;resize:vertical}
-.cnote{font-family:var(--prose);font-size:9px;letter-spacing:.18em;color:var(--dim);margin-top:12px;text-transform:uppercase}
+.cnote{font-family:var(--prose);font-size:9px;letter-spacing:.18em;color:var(--dim);margin-top:12px;
+  text-transform:uppercase;min-height:1em;transition:color .3s}
+.cnote[data-kind="ok"]{color:var(--blue)}
+.cnote[data-kind="err"]{color:var(--amber)}
+.btn:disabled{opacity:.45;border-color:var(--line)}
+.btn:disabled:hover{color:var(--ink);background:transparent;gap:10px}
+/* honeypot: bots fill it, people never see it */
+.hp{position:absolute!important;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none}
 
 /* ===== right column =========================================== */
 .col-r{grid-column:3;grid-row:2;display:flex;flex-direction:column;gap:14px;min-height:0}
@@ -630,11 +637,14 @@ html[data-theme="light"] .ico-sun{display:none}
           <a href="https://www.linkedin.com/in/andrewjkaddo/" target="_blank" rel="noopener noreferrer" data-hover="LINKEDIN"><span class="k">LinkedIn</span><span class="v">/in/andrewjkaddo</span><span class="ar">&#8599;</span></a>
           <a href="https://github.com/djkcrazh" target="_blank" rel="noopener noreferrer" data-hover="GITHUB"><span class="k">GitHub</span><span class="v">@djkcrazh</span><span class="ar">&#8599;</span></a>
         </div>
-        <form class="cform" id="cform">
-          <input type="text" placeholder="Callsign / name" />
-          <input type="email" placeholder="Return address" />
-          <textarea placeholder="Message"></textarea>
-          <div><button type="submit" class="btn" data-hover="SEND">Transmit <span>&rarr;</span></button></div>
+        <form class="cform" id="cform" action="https://formspree.io/f/mbglkpgj" method="POST">
+          <input type="text" name="name" placeholder="Callsign / name" autocomplete="name" required />
+          <input type="email" name="email" placeholder="Return address" autocomplete="email" required />
+          <textarea name="message" placeholder="Message" required></textarea>
+          <input type="hidden" name="_subject" value="Portfolio transmission" />
+          <input class="hp" type="text" name="_gotcha" tabindex="-1" autocomplete="off" aria-hidden="true" />
+          <div><button type="submit" class="btn" id="cbtn" data-hover="SEND">Transmit <span>&rarr;</span></button></div>
+          <div class="cnote" id="cnote" role="status" aria-live="polite"></div>
         </form>
       </section>
 

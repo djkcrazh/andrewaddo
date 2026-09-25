@@ -82,6 +82,24 @@ to keep the swap from shoving the layout. Honours `prefers-reduced-motion`, and 
 loop idles while Home is off-screen. Tuning lives at the top of the name block in
 `assets/site.js` (`NAME`, `POOL`, `GLITCH_MS`) and in the `g*` keyframes in `index.html`.
 
+## Contact form
+
+Posts to Formspree (`https://formspree.io/f/mbglkpgj`) with `fetch`, not a native form
+submit -- a native POST navigates away to Formspree's thank-you page, which would drop
+the visitor out of the dashboard. Doing it in-page also keeps the success and error
+copy in our own type.
+
+- Fields are `name`, `email`, `message`, plus a hidden `_subject` and a `_gotcha`
+  honeypot that bots fill and humans never see.
+- All three visible fields are `required`; the browser validates before anything sends.
+- While in flight the button disables and reads "Transmitting".
+- On success the form clears. **On failure it does not** -- whatever was typed stays
+  put so it can be retried.
+- Status renders in `#cnote`: blue for success, amber for failure.
+
+The `action` attribute is the single source of truth for the endpoint; `site.js` reads
+it off the form. To swap providers, change the attribute.
+
 ## Light mode
 
 The sun/moon button at the right of the header strip. Sun = you are in dark, click for

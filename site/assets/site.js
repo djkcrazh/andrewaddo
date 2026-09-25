@@ -42,17 +42,17 @@
   var PROJECTS = [
     { t: 'Nhoma Dashboard',
       d: 'Pig farm management app: a herd ledger tracking breeding and 114-day gestation, weight history, market readiness and alerts.',
-      stack: ['Next.js', 'TypeScript', 'Prisma', 'PostgreSQL'], y: '2026',
+      stack: ['Next.js', 'TypeScript', 'SQL'], y: '2026',
       url: 'https://github.com/djkcrazh/nhoma' },
 
-    { t: 'Bottle Builders LLC',
+    { t: 'Bottle Builders LLC Website',
       d: 'Five-page site for a bottle recycling company, drawn as an architectural blueprint.',
-      stack: ['HTML', 'CSS', 'JavaScript', 'Vercel'], y: '2026',
+      stack: ['HTML', 'CSS', 'JavaScript'], y: '2026',
       url: 'https://www.bottlebuilders.com/' },
 
     { t: 'Kairosz',
       d: 'Beat compilation from Summer 2026.',
-      stack: ['Ableton', 'Sound design'], y: '2026',
+      stack: ['FL Studio'], y: '2026',
       url: 'https://soundcloud.com/djkcrazh/sets/kairosz' }
   ];
 
@@ -385,18 +385,56 @@
   })();
 
   /* ----------------------------------------------------------- contact -- */
-  $('cform').addEventListener('submit', function (e) {
+  /* Formspree via fetch rather than a plain form POST -- a native submit
+     navigates away to Formspree's thank-you page, which would drop you out of
+     the dashboard. Keeping it in-page also lets errors render in our own type. */
+  var cform = $('cform'), cbtn = $('cbtn'), cnote = $('cnote');
+  var cbtnHTML = cbtn.innerHTML;
+
+  function note(msg, kind) {
+    cnote.textContent = msg || '';
+    if (kind) cnote.dataset.kind = kind; else delete cnote.dataset.kind;
+  }
+
+  cform.addEventListener('submit', function (e) {
     e.preventDefault();
-    // the note element is optional -- make one if the markup does not carry it
-    var note = $('cnote');
-    if (!note) {
-      note = document.createElement('div');
-      note.className = 'cnote';
-      note.id = 'cnote';
-      this.appendChild(note);
-    }
-    note.textContent = 'No endpoint yet - wire this to a form handler before launch';
-    note.style.color = 'var(--amber)';
+    if (cform.dataset.busy) return;
+    if (cform.reportValidity && !cform.reportValidity()) return;
+
+    cform.dataset.busy = '1';
+    cbtn.disabled = true;
+    cbtn.innerHTML = 'Transmitting';
+    note('Opening channel');
+
+    fetch(cform.action, {
+      method: 'POST',
+      body: new FormData(cform),
+      headers: { Accept: 'application/json' }
+    })
+      .then(function (res) {
+        return res.json()
+          .catch(function () { return {}; })
+          .then(function (body) { return { ok: res.ok, body: body }; });
+      })
+      .then(function (r) {
+        if (r.ok) {
+          cform.reset();
+          note('Transmission received - I will reply to that address', 'ok');
+        } else {
+          var errs = (r.body && r.body.errors) || [];
+          note(errs.length
+            ? errs.map(function (x) { return x.message; }).join(' / ')
+            : 'Transmission failed - try again, or email me directly', 'err');
+        }
+      })
+      .catch(function () {
+        note('No signal - check your connection and try again', 'err');
+      })
+      .then(function () {
+        delete cform.dataset.busy;
+        cbtn.disabled = false;
+        cbtn.innerHTML = cbtnHTML;
+      });
   });
 
   /* ----------------------------------------------------------- theme ----
