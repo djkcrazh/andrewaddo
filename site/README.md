@@ -136,7 +136,7 @@ Four arrays near the top, all plain data:
 
 | array | what |
 |---|---|
-| `PROJECTS` | title, one-liner, stack tags, year, status, `url` (rows open in a new tab) |
+| `PROJECTS` | title, one-liner, stack tags, year, status, `url` (rows open in a new tab; no status label) |
 | `SKILLS` | sections -> panels -> `['Name', percent]` |
 | `NAME` | the glitching name (`'Andrew Addo'`) |
 | `LOGS` | the scrolling lines in the Systems panel |

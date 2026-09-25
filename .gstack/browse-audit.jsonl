@@ -249,3 +249,8 @@
 {"ts":"2026-09-25T00:21:47.963Z","cmd":"click","args":"#cform button[type=submit]","origin":"http://localhost:8743/#contact","durationMs":2044,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-09-25T00:21:49.008Z","cmd":"js","args":"JSON.stringify({note:(document.getElementById('cnote')||{}).textContent||'none'})","origin":"http://localhost:8743/#contact","durationMs":6,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-09-25T00:21:49.045Z","cmd":"console","args":"--errors","origin":"http://localhost:8743/#contact","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:24:01.629Z","cmd":"reload","args":"","origin":"http://localhost:8743/#contact","durationMs":24,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:24:06.777Z","cmd":"click","args":"a[data-view=projects]","origin":"http://localhost:8743/#projects","durationMs":2041,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:24:08.828Z","cmd":"js","args":"JSON.stringify(Array.from(document.querySelectorAll('.pitem')).map(function(a){return a.getAttribute('href')+' | '+a.querySelector('.meta').textContent.trim()}))","origin":"http://localhost:8743/#projects","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:24:08.936Z","cmd":"screenshot","args":"--viewport /tmp/y-projects.png","origin":"http://localhost:8743/#projects","durationMs":69,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:24:08.977Z","cmd":"console","args":"--errors","origin":"http://localhost:8743/#projects","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}

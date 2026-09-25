@@ -42,17 +42,17 @@
   var PROJECTS = [
     { t: 'Nhoma Dashboard',
       d: 'Pig farm management app: a herd ledger tracking breeding and 114-day gestation, weight history, market readiness and alerts.',
-      stack: ['Next.js', 'TypeScript', 'Prisma', 'PostgreSQL'], y: '2026', s: 'GITHUB',
+      stack: ['Next.js', 'TypeScript', 'Prisma', 'PostgreSQL'], y: '2026',
       url: 'https://github.com/djkcrazh/nhoma' },
 
     { t: 'Bottle Builders LLC',
       d: 'Five-page site for a bottle recycling company, drawn as an architectural blueprint.',
-      stack: ['HTML', 'CSS', 'JavaScript', 'Vercel'], y: '2026', s: 'GITHUB',
-      url: 'https://github.com/djkcrazh/Bottle-Builders-LLC' },
+      stack: ['HTML', 'CSS', 'JavaScript', 'Vercel'], y: '2026',
+      url: 'https://www.bottlebuilders.com/' },
 
     { t: 'Kairosz',
       d: 'Beat compilation from Summer 2026.',
-      stack: ['Ableton', 'Sound design'], y: '2026', s: 'SOUNDCLOUD',
+      stack: ['Ableton', 'Sound design'], y: '2026',
       url: 'https://soundcloud.com/djkcrazh/sets/kairosz' }
   ];
 
@@ -84,12 +84,12 @@
       a.href = p.url;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
-      a.dataset.hover = p.s;
+      a.dataset.hover = 'OPEN';
       a.innerHTML =
         '<span class="n">' + String(i + 1).padStart(2, '0') + '</span>' +
         '<span><span class="t">' + p.t + '</span><div class="d">' + p.d + '</div>' +
         '<div class="stack">' + p.stack.map(function (s) { return '<em>' + s + '</em>'; }).join('') + '</div></span>' +
-        '<span class="meta"><b>' + p.s + '</b>' + p.y + '<span class="ext">&#8599;</span></span>';
+        '<span class="meta">' + p.y + '<span class="ext">&#8599;</span></span>';
       wrap.appendChild(a);
     });
   })();
