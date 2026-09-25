@@ -38,11 +38,22 @@
   })();
 
   /* -------------------------------------------------------------- content */
+  /* Descriptions drafted from each repo's README -- correct them freely. */
   var PROJECTS = [
-    { t: 'Project One',   d: 'One line on what it is and who it is for.',      stack: ['TypeScript', 'Next.js', 'Postgres'], y: '2026', s: 'LIVE' },
-    { t: 'Project Two',   d: 'One line. Replace all of this with real work.',  stack: ['Python', 'Modal', 'Whisper'],        y: '2025', s: 'LIVE' },
-    { t: 'Project Three', d: 'One line. Rows expand as you add them.',         stack: ['Swift', 'CoreAudio'],                y: '2025', s: 'ARCHIVE' },
-    { t: 'Project Four',  d: 'One line. Status can be anything you like.',     stack: ['Go', 'Redis'],                       y: '2024', s: 'BUILDING' }
+    { t: 'Nhoma Dashboard',
+      d: 'Pig farm management app: a herd ledger tracking breeding and 114-day gestation, weight history, market readiness and alerts.',
+      stack: ['Next.js', 'TypeScript', 'Prisma', 'PostgreSQL'], y: '2026', s: 'GITHUB',
+      url: 'https://github.com/djkcrazh/nhoma' },
+
+    { t: 'Bottle Builders LLC',
+      d: 'Five-page site for a bottle recycling company, drawn as an architectural blueprint.',
+      stack: ['HTML', 'CSS', 'JavaScript', 'Vercel'], y: '2026', s: 'GITHUB',
+      url: 'https://github.com/djkcrazh/Bottle-Builders-LLC' },
+
+    { t: 'Kairosz',
+      d: 'Beat compilation from Summer 2026.',
+      stack: ['Ableton', 'Sound design'], y: '2026', s: 'SOUNDCLOUD',
+      url: 'https://soundcloud.com/djkcrazh/sets/kairosz' }
   ];
 
   /* Levels are placeholders chosen to honour the order and ties you gave --
@@ -69,12 +80,16 @@
     var wrap = $('plist');
     PROJECTS.forEach(function (p, i) {
       var a = document.createElement('a');
-      a.className = 'pitem'; a.href = '#projects'; a.dataset.hover = 'OPEN';
+      a.className = 'pitem';
+      a.href = p.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.dataset.hover = p.s;
       a.innerHTML =
         '<span class="n">' + String(i + 1).padStart(2, '0') + '</span>' +
         '<span><span class="t">' + p.t + '</span><div class="d">' + p.d + '</div>' +
         '<div class="stack">' + p.stack.map(function (s) { return '<em>' + s + '</em>'; }).join('') + '</div></span>' +
-        '<span class="meta"><b>' + p.s + '</b>' + p.y + '</span>';
+        '<span class="meta"><b>' + p.s + '</b>' + p.y + '<span class="ext">&#8599;</span></span>';
       wrap.appendChild(a);
     });
   })();
@@ -93,8 +108,7 @@
         d.innerHTML = '<h4><span>' + pan.g + '</span><em>' + pan.items.length + '</em></h4>' +
           pan.items.map(function (it) {
             return '<div class="skrow"><span class="nm">' + it[0] + '</span>' +
-                   '<span class="mb"><i data-w="' + it[1] + '"></i></span>' +
-                   '<span class="pc">' + it[1] + '%</span></div>';
+                   '<span class="mb"><i data-w="' + it[1] + '"></i></span></div>';
           }).join('');
         block.appendChild(d);
       });
@@ -256,13 +270,9 @@
   }, 250);
 
   /* ------------------------------------------------------------- systems */
-  ['mSig', 'mArc', 'mPay'].forEach(function (id, i) {
-    var base = [86, 42, 67][i], node = $(id), out = node.parentElement.nextElementSibling;
-    setInterval(function () {
-      var v = Math.max(4, Math.min(99, base + (Math.random() * 6 - 3)));
-      node.style.width = v.toFixed(0) + '%'; out.textContent = v.toFixed(0) + '%';
-    }, 2600 + i * 900);
-  });
+  /* Bars are fixed in the markup (Engineer 80 / Creative 75 / Athlete 50) --
+     no drift, no readouts. */
+
   var LOGS = ['field stable', 'awaiting content payload', 'five transmissions cached',
               'chronometer synced · america/new_york', 'parallax within tolerance', 'origin record locked'];
   var li = 2, logEl = $('log');
@@ -377,8 +387,16 @@
   /* ----------------------------------------------------------- contact -- */
   $('cform').addEventListener('submit', function (e) {
     e.preventDefault();
-    $('cnote').textContent = 'No endpoint yet - wire this to a form handler before launch';
-    $('cnote').style.color = 'var(--amber)';
+    // the note element is optional -- make one if the markup does not carry it
+    var note = $('cnote');
+    if (!note) {
+      note = document.createElement('div');
+      note.className = 'cnote';
+      note.id = 'cnote';
+      this.appendChild(note);
+    }
+    note.textContent = 'No endpoint yet - wire this to a form handler before launch';
+    note.style.color = 'var(--amber)';
   });
 
   /* ----------------------------------------------------------- theme ----

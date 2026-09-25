@@ -178,7 +178,7 @@ html[data-theme="light"] .ico-sun{display:none}
 .mrow .mb{flex:1;height:2px;background:rgba(var(--accent-rgb),.14)}
 .mrow .mb i{display:block;height:100%;background:var(--blue);box-shadow:0 0 7px rgba(var(--accent-rgb),.7);transition:width 1.2s ease}
 .mrow .mb.amb i{background:var(--amber);box-shadow:0 0 7px rgba(251,191,36,.7)}
-.mrow b{color:var(--ink);font-weight:400;width:42px;text-align:right;font-family:var(--data);font-size:10px;font-variant-numeric:tabular-nums}
+.mrow .mb{margin-right:4px}
 .log{margin-top:auto;border-top:1px solid var(--line);padding-top:10px;font-family:var(--micro);font-size:10.5px;line-height:1.95;color:var(--dim);letter-spacing:.07em}
 .log div span{color:rgba(var(--accent-rgb),.65);margin-right:8px}
 
@@ -317,6 +317,8 @@ html[data-theme="light"] .ico-sun{display:none}
   border:1px solid var(--line);padding:3px 7px;color:var(--dim);text-transform:uppercase}
 .pitem .meta{text-align:right;font-family:var(--prose);font-size:10px;letter-spacing:.12em;color:var(--dim);line-height:2}
 .pitem .meta b{display:block;color:var(--blue);font-weight:400}
+.pitem .meta .ext{display:block;opacity:0;transform:translateX(-4px);transition:.26s;color:var(--blue)}
+.pitem:hover .meta .ext{opacity:1;transform:translateX(0)}
 .pitem:hover .t{color:var(--blue)}
 
 /* --- SKILLS --- */
@@ -336,7 +338,6 @@ html[data-theme="light"] .ico-sun{display:none}
 .skrow .mb{flex:1;height:2px;background:var(--track)}
 .skrow .mb i{display:block;height:100%;background:var(--blue);box-shadow:0 0 7px var(--blue-glow);
   width:0;transition:width 1.1s cubic-bezier(.2,.8,.2,1)}
-.skrow .pc{font-family:var(--data);font-size:9.5px;color:var(--dim);width:34px;text-align:right;font-variant-numeric:tabular-nums}
 .resume{margin-top:8px;border:1px solid var(--line);padding:22px 24px;display:flex;
   align-items:center;gap:22px;background:linear-gradient(120deg,var(--tint2),transparent)}
 .resume .rt{flex:1}
@@ -517,9 +518,9 @@ html[data-theme="light"] .ico-sun{display:none}
 
     <div class="panel grow">
       <h2>Systems <span class="id">S-01</span></h2>
-      <div class="mrow"><span style="width:78px">Engineer</span><span class="mb"><i id="mSig" style="width:85%"></i></span><b>85%</b></div>
-      <div class="mrow"><span style="width:78px">Creative</span><span class="mb"><i id="mArc" style="width:87%"></i></span><b>87%</b></div>
-      <div class="mrow"><span style="width:78px">Athlete</span><span class="mb amb"><i id="mPay" style="width:73%"></i></span><b>73%</b></div>
+      <div class="mrow"><span style="width:78px">Engineer</span><span class="mb"><i style="width:80%"></i></span></div>
+      <div class="mrow"><span style="width:78px">Creative</span><span class="mb"><i style="width:75%"></i></span></div>
+      <div class="mrow"><span style="width:78px">Athlete</span><span class="mb amb"><i style="width:50%"></i></span></div>
       <div class="log" id="log">
         <div><span>&raquo;</span>field stable</div>
         <div><span>&raquo;</span>awaiting content payload</div>
@@ -626,9 +627,9 @@ html[data-theme="light"] .ico-sun{display:none}
           <div class="lede">Lets keep in touch!</div>
         </div>
         <div class="chan">
-          <a href="#" data-hover="EMAIL"><span class="k">Email</span><span class="v">--</span><span class="ar">&rarr;</span></a>
-          <a href="#" data-hover="LINKEDIN"><span class="k">LinkedIn</span><span class="v">--</span><span class="ar">&rarr;</span></a>
-          <a href="#" data-hover="GITHUB"><span class="k">GitHub</span><span class="v">--</span><span class="ar">&rarr;</span></a>
+          <a href="mailto:andrewaddo@princeton.edu" data-hover="EMAIL"><span class="k">Email</span><span class="v">andrewaddo@princeton.edu</span><span class="ar">&rarr;</span></a>
+          <a href="https://www.linkedin.com/in/andrewjkaddo/" target="_blank" rel="noopener noreferrer" data-hover="LINKEDIN"><span class="k">LinkedIn</span><span class="v">/in/andrewjkaddo</span><span class="ar">&#8599;</span></a>
+          <a href="https://github.com/djkcrazh" target="_blank" rel="noopener noreferrer" data-hover="GITHUB"><span class="k">GitHub</span><span class="v">@djkcrazh</span><span class="ar">&#8599;</span></a>
         </div>
         <form class="cform" id="cform">
           <input type="text" placeholder="Callsign / name" />

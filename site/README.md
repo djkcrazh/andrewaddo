@@ -102,8 +102,11 @@ Two sections, three panels, stacked vertically in the scrolling screen:
 - **Artist** -> Music & Performance (5)
 
 Order and ties come from you; the **percentages are placeholders** picked to honour
-that order. Tune them in the `SKILLS` array at the top of `assets/site.js` and the bars
-and readouts follow.
+that order. Tune them in the `SKILLS` array at the top of `assets/site.js`. The numbers
+are not shown anywhere -- they only set bar length.
+
+The Systems panel bars are fixed in `index.html` (Engineer 80 / Creative 75 /
+Athlete 50). Edit the inline `style="width:N%"` to change them.
 
 ## Editing the text
 
@@ -133,7 +136,7 @@ Four arrays near the top, all plain data:
 
 | array | what |
 |---|---|
-| `PROJECTS` | title, one-liner, stack tags, year, status |
+| `PROJECTS` | title, one-liner, stack tags, year, status, `url` (rows open in a new tab) |
 | `SKILLS` | sections -> panels -> `['Name', percent]` |
 | `NAME` | the glitching name (`'Andrew Addo'`) |
 | `LOGS` | the scrolling lines in the Systems panel |

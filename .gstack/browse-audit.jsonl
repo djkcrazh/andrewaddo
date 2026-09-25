@@ -224,3 +224,28 @@
 {"ts":"2026-09-24T23:07:23.654Z","cmd":"click","args":"a[data-view=home]","origin":"http://localhost:8743/#home","durationMs":71,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-09-24T23:07:26.058Z","cmd":"screenshot","args":"--viewport /tmp/w-home.png","origin":"http://localhost:8743/#home","durationMs":267,"status":"ok","hasCookies":false,"mode":"launched"}
 {"ts":"2026-09-24T23:07:26.312Z","cmd":"console","args":"--errors","origin":"http://localhost:8743/#home","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:19:13.719Z","cmd":"goto","args":"https://github.com/djkcrazh?tab=repositories","origin":"https://github.com/djkcrazh?tab=repositories","durationMs":563,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:19:15.808Z","cmd":"text","args":"","origin":"https://github.com/djkcrazh?tab=repositories","durationMs":6,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:19:19.093Z","cmd":"links","args":"","origin":"https://github.com/djkcrazh?tab=repositories","durationMs":4,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:19:25.327Z","cmd":"goto","args":"https://github.com/djkcrazh/nhoma","origin":"https://github.com/djkcrazh/nhoma","durationMs":787,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:19:27.390Z","cmd":"text","args":"","origin":"https://github.com/djkcrazh/nhoma","durationMs":4,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:19:33.115Z","cmd":"goto","args":"https://github.com/djkcrazh/Bottle-Builders-LLC","origin":"https://github.com/djkcrazh/Bottle-Builders-LLC","durationMs":713,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:19:35.198Z","cmd":"text","args":"","origin":"https://github.com/djkcrazh/Bottle-Builders-LLC","durationMs":4,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:19:35.251Z","cmd":"links","args":"","origin":"https://github.com/djkcrazh/Bottle-Builders-LLC","durationMs":4,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:20:38.000Z","cmd":"viewport","args":"1440x900","origin":"https://github.com/djkcrazh/Bottle-Builders-LLC","durationMs":40,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:20:38.149Z","cmd":"goto","args":"http://localhost:8743/","origin":"http://localhost:8743/","durationMs":101,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:20:53.221Z","cmd":"reload","args":"","origin":"http://localhost:8743/","durationMs":15003,"status":"error","hasCookies":false,"mode":"launched","error":"reload: Timeout 15000ms exceeded.\nCall log:\n  - waiting for navigation until \"domcontentloaded\"\n"}
+{"ts":"2026-09-25T00:20:56.322Z","cmd":"console","args":"--errors","origin":"http://localhost:8743/","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:20:56.358Z","cmd":"js","args":"JSON.stringify({sysBars:Array.from(document.querySelectorAll('.mrow .mb i')).map(function(i){return i.style.width}),sysPct:document.querySelectorAll('.mrow b').length,skillPct:document.querySelectorAl…","origin":"http://localhost:8743/","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:21:02.598Z","cmd":"click","args":"a[data-view=projects]","origin":"http://localhost:8743/#projects","durationMs":2069,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:21:04.737Z","cmd":"screenshot","args":"--viewport /tmp/x-projects.png","origin":"http://localhost:8743/#projects","durationMs":91,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:21:06.812Z","cmd":"click","args":"a[data-view=contact]","origin":"http://localhost:8743/#contact","durationMs":2037,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:21:08.952Z","cmd":"screenshot","args":"--viewport /tmp/x-contact.png","origin":"http://localhost:8743/#contact","durationMs":93,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:21:10.786Z","cmd":"click","args":"a[data-view=skills]","origin":"http://localhost:8743/#skills","durationMs":1791,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:21:12.919Z","cmd":"screenshot","args":"--viewport /tmp/x-skills.png","origin":"http://localhost:8743/#skills","durationMs":92,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:21:28.691Z","cmd":"js","args":"document.getElementById('cnote')===null ? 'MISSING' : 'present'","origin":"http://localhost:8743/#skills","durationMs":1,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:21:39.248Z","cmd":"reload","args":"","origin":"http://localhost:8743/#skills","durationMs":17,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:21:44.375Z","cmd":"click","args":"a[data-view=contact]","origin":"http://localhost:8743/#contact","durationMs":2046,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:21:47.963Z","cmd":"click","args":"#cform button[type=submit]","origin":"http://localhost:8743/#contact","durationMs":2044,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:21:49.008Z","cmd":"js","args":"JSON.stringify({note:(document.getElementById('cnote')||{}).textContent||'none'})","origin":"http://localhost:8743/#contact","durationMs":6,"status":"ok","hasCookies":false,"mode":"launched"}
+{"ts":"2026-09-25T00:21:49.045Z","cmd":"console","args":"--errors","origin":"http://localhost:8743/#contact","durationMs":0,"status":"ok","hasCookies":false,"mode":"launched"}
