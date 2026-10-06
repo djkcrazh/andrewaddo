@@ -14,7 +14,7 @@
     parallax: 20,
     drift: gentle ? { x: -5, y: 1.2 } : { x: -11, y: 2.6 },
     float: gentle ? { amp: 16, speed: .4 } : { amp: 34, speed: .65 },
-    gravity: { radius: 400, pull: 140, swirl: .15 },
+    gravity: { radius: 340, pull: 100, swirl: .12 },
     shooting: gentle ? { every: [7000, 14000], speed: 520 } : { every: [3000, 7000], speed: 700 },
     layers: [
       { count: 340, size: [.35, .8], depth: .2,  alpha: [.18, .45], color: '#ffffff' },
