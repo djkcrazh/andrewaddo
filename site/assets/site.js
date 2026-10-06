@@ -10,10 +10,10 @@
   /* ---------------------------------------------------------------- field */
   var field = S.createStarfield($('stars'), {
     parallax: 20,
-    drift: { x: -7, y: 1.8 },
-    float: { amp: 24, speed: .5 },
-    gravity: { radius: 300, pull: 120, swirl: .35 },
-    shooting: { every: [4500, 9500], speed: 620 },
+    drift: { x: -11, y: 2.6 },
+    float: { amp: 34, speed: .65 },
+    gravity: { radius: 400, pull: 210, swirl: .5 },
+    shooting: { every: [3000, 7000], speed: 700 },
     layers: [
       { count: 340, size: [.35, .8], depth: .2,  alpha: [.18, .45], color: '#ffffff' },
       { count: 120, size: [.7, 1.3], depth: .55, alpha: [.3, .7],   color: '#cfe6ff' },

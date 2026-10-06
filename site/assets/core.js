@@ -124,7 +124,7 @@
           if (dd < gravity.radius) {
             var f = 1 - dd / gravity.radius;
             f *= f;
-            var stp = Math.min(f * gStr * gravity.pull * (0.35 + s.depth * 0.9), dd * 0.7);
+            var stp = Math.min(f * gStr * gravity.pull * (0.55 + s.depth * 0.9), dd * 0.75);
             var ux = ddx / dd, uy = ddy / dd;
             pgx = ux * stp - uy * stp * gravity.swirl;
             pgy = uy * stp + ux * stp * gravity.swirl;
@@ -156,11 +156,11 @@
 
         var alpha = s.a;
         if (twinkle) alpha *= 0.62 + 0.38 * Math.sin(t * s.tw + s.phase);
-        alpha = clamp(alpha * alphaBoost + boost * 0.9 + gl * 0.35, 0, 1);
+        alpha = clamp(alpha * alphaBoost + boost * 0.9 + gl * 0.6, 0, 1);
 
         ctx.globalAlpha = alpha;
         ctx.fillStyle = s.color;
-        var rr = s.r * (1 + boost * 0.8 + gl * 0.5);
+        var rr = s.r * (1 + boost * 0.8 + gl * 0.9);
         ctx.beginPath();
         ctx.arc(x + s.ox + s.gx, y + s.oy + s.gy, rr, 0, TAU);
         ctx.fill();
