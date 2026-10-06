@@ -32,10 +32,7 @@
     var float = opts.float || null;
     // gravity: the mouse bends nearby stars toward it. {radius, pull: px, swirl}
     var gravity = opts.gravity || null;
-    // motion on = adventure mode. Off = a still sky: no drift, float, parallax,
-    // shooting stars, splash or gravity. All the motion maths runs on `mt`, a clock
-    // that only ticks while motion is on, so switching never makes the stars jump.
-    var motion = opts.motion !== false;
+    // all motion maths runs on `mt`; dt is capped so a backgrounded tab does not leap ahead
     var mt = 0, last = performance.now();
     var gStr = 0, gx = 0, gy = 0, gTx = 0, gTy = 0, mouseIn = false;
     var rippleCfg = Object.assign(
@@ -88,16 +85,14 @@
     function frame(now) {
       var dt = Math.min((now - last) / 1000, 0.1);   // a backgrounded tab must not leap ahead
       last = now;
-      if (motion) mt += dt;
+      mt += dt;
       var t = mt;
       ctx.clearRect(0, 0, W, H);
 
-      if (motion) {
-        px = lerp(px, mx, 0.055);
-        py = lerp(py, my, 0.055);
-      }
+      px = lerp(px, mx, 0.055);
+      py = lerp(py, my, 0.055);
       // gravity strength eases in/out; the pointer it chases is smoothed too
-      gStr = lerp(gStr, motion && mouseIn ? 1 : 0, 0.07);
+      gStr = lerp(gStr, mouseIn ? 1 : 0, 0.07);
       gx = lerp(gx, gTx, 0.22); gy = lerp(gy, gTy, 0.22);
       var offX = (px - 0.5) * parallax;
       var offY = (py - 0.5) * parallax;
@@ -192,7 +187,7 @@
       }
 
       // occasional shooting star
-      if (shooting && motion) {
+      if (shooting) {
         nextShot -= 16;
         if (nextShot <= 0) {
           nextShot = rand(shooting.every[0], shooting.every[1]);
@@ -229,7 +224,6 @@
     // and a gentler one (k scales displacement, boost and ring).
     var TOUCH_K = 0.35, touchDown = null;
     function onDown(e) {
-      if (!motion) return;
       if (e.pointerType === 'touch' || e.pointerType === 'pen') {
         touchDown = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now() };
         return;
@@ -238,7 +232,6 @@
     }
     function onUp(e) {
       var d = touchDown;
-      if (!motion) { touchDown = null; return; }
       if (!d || d.id !== e.pointerId) return;
       touchDown = null;
       var now = performance.now();
@@ -259,14 +252,7 @@
     raf = requestAnimationFrame(frame);
 
     return {
-      setMotion: function (on) {
-        on = !!on;
-        if (on === motion) return;
-        motion = on;
-        if (!on) { ripples.length = 0; shots.length = 0; touchDown = null; }   // offsets ease back to rest
-      },
-      isMotion: function () { return motion; },
-      ripple: function (x, y) { if (!motion) return; ripples.push({ x: x, y: y, t: performance.now(), k: 1 }); },
+      ripple: function (x, y) { ripples.push({ x: x, y: y, t: performance.now(), k: 1 }); },
       // recolour a live field without rebuilding it — used by the theme toggle
       setPalette: function (opts) {
         if (opts.layers) {
