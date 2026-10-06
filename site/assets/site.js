@@ -260,6 +260,17 @@
   });
   window.addEventListener('popstate', function () { go(location.hash.slice(1), false); });
   go(location.hash.slice(1) || 'home', false);
+  // A reload (or a back/forward restore) on a phone must land on a clean top bar:
+  // no restored scroll offset, menu closed, and a forced repaint of the bar.
+  if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+  window.addEventListener('pageshow', function () {
+    window.scrollTo(0, 0);
+    setMenu(false);
+    var strip = document.querySelector('.strip');
+    strip.style.display = 'none';
+    void strip.offsetHeight;
+    strip.style.display = '';
+  });
   // resizing across the breakpoint must not strand you on the dashboard page
   var onBreak = function () { if (current === 'dashboard' && !mobileMQ.matches) go('home', false); else if (mobileMQ.matches === false) setMenu(false); };
   if (mobileMQ.addEventListener) mobileMQ.addEventListener('change', onBreak); else mobileMQ.addListener(onBreak);

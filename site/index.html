@@ -539,7 +539,10 @@ html[data-theme="light"] .ico-sun{display:none}
   html,body{height:100%;overflow:hidden}
   .shell{position:fixed;inset:0;display:flex;flex-direction:column;gap:0;
     padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
-  .strip{flex:0 0 46px;height:46px;border-width:0 0 1px 0}
+  /* iOS WebKit can drop the contents of a backdrop-filtered bar inside a fixed
+     layer after a reload; on phones the bar gets a plain tinted fill instead */
+  .strip{flex:0 0 46px;height:46px;border-width:0 0 1px 0;position:relative;z-index:5;
+    backdrop-filter:none;-webkit-backdrop-filter:none;background:rgba(var(--void-rgb),.82)}
   .strip .menub{display:flex}
   .strip .cell{padding:0 12px}
   .strip .cell:nth-child(n+3):not(.themeb){display:none}  /* keep menu, brand, theme */
