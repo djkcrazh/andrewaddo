@@ -28,9 +28,16 @@
     var parallax = opts.parallax == null ? 26 : opts.parallax;
     var twinkle = opts.twinkle !== false;
     // each star also wanders on its own slow loop, so the field breathes even when
-    // nothing is moving. {amp: px, speed: rad/s}; off when the user asks for less motion
-    var reduced = global.matchMedia && global.matchMedia('(prefers-reduced-motion:reduce)').matches;
-    var float = reduced ? null : opts.float || null;
+    // nothing is moving. {amp: px, speed: rad/s}
+    var float = opts.float || null;
+    // gravity: the mouse bends nearby stars toward it. {radius, pull: px, swirl}
+    var gravity = opts.gravity || null;
+    // motion on = adventure mode. Off = a still sky: no drift, float, parallax,
+    // shooting stars, splash or gravity. All the motion maths runs on `mt`, a clock
+    // that only ticks while motion is on, so switching never makes the stars jump.
+    var motion = opts.motion !== false;
+    var mt = 0, last = performance.now();
+    var gStr = 0, gx = 0, gy = 0, gTx = 0, gTy = 0, mouseIn = false;
     var rippleCfg = Object.assign(
       { speed: 620, width: 46, amplitude: 34, life: 1.9, ring: true, ringColor: '255,255,255', ringAlpha: 0.1 },
       opts.ripple || {}
@@ -62,6 +69,7 @@
             phase: Math.random() * TAU,
             tw: rand(0.4, 1.6),
             ox: 0, oy: 0,        // ripple offset
+            gx: 0, gy: 0,        // gravity offset
             fp: Math.random() * TAU, fq: Math.random() * TAU,   // float phases
             fs: rand(0.6, 1.4), fr: rand(0.5, 1),               // float speed / reach
             layer: li
@@ -78,11 +86,19 @@
     }
 
     function frame(now) {
-      var t = (now - t0) / 1000;
+      var dt = Math.min((now - last) / 1000, 0.1);   // a backgrounded tab must not leap ahead
+      last = now;
+      if (motion) mt += dt;
+      var t = mt;
       ctx.clearRect(0, 0, W, H);
 
-      px = lerp(px, mx, 0.055);
-      py = lerp(py, my, 0.055);
+      if (motion) {
+        px = lerp(px, mx, 0.055);
+        py = lerp(py, my, 0.055);
+      }
+      // gravity strength eases in/out; the pointer it chases is smoothed too
+      gStr = lerp(gStr, motion && mouseIn ? 1 : 0, 0.07);
+      gx = lerp(gx, gTx, 0.22); gy = lerp(gy, gTy, 0.22);
       var offX = (px - 0.5) * parallax;
       var offY = (py - 0.5) * parallax;
 
@@ -104,6 +120,24 @@
         // wrap
         x = ((x % W) + W) % W;
         y = ((y % H) + H) % H;
+
+        // gravity well: stars fall toward the pointer, curving slightly as they go
+        var pgx = 0, pgy = 0, gl = 0;
+        if (gravity && gStr > 0.003) {
+          var ddx = gx - x, ddy = gy - y;
+          var dd = Math.sqrt(ddx * ddx + ddy * ddy) || 0.0001;
+          if (dd < gravity.radius) {
+            var f = 1 - dd / gravity.radius;
+            f *= f;
+            var stp = Math.min(f * gStr * gravity.pull * (0.35 + s.depth * 0.9), dd * 0.7);
+            var ux = ddx / dd, uy = ddy / dd;
+            pgx = ux * stp - uy * stp * gravity.swirl;
+            pgy = uy * stp + ux * stp * gravity.swirl;
+            gl = f * gStr;
+          }
+        }
+        s.gx = lerp(s.gx, pgx, 0.16);
+        s.gy = lerp(s.gy, pgy, 0.16);
 
         // shockwave displacement
         var dx = 0, dy = 0, boost = 0;
@@ -127,13 +161,13 @@
 
         var alpha = s.a;
         if (twinkle) alpha *= 0.62 + 0.38 * Math.sin(t * s.tw + s.phase);
-        alpha = clamp(alpha * alphaBoost + boost * 0.9, 0, 1);
+        alpha = clamp(alpha * alphaBoost + boost * 0.9 + gl * 0.35, 0, 1);
 
         ctx.globalAlpha = alpha;
         ctx.fillStyle = s.color;
-        var rr = s.r * (1 + boost * 0.8);
+        var rr = s.r * (1 + boost * 0.8 + gl * 0.5);
         ctx.beginPath();
-        ctx.arc(x + s.ox, y + s.oy, rr, 0, TAU);
+        ctx.arc(x + s.ox + s.gx, y + s.oy + s.gy, rr, 0, TAU);
         ctx.fill();
       }
 
@@ -158,7 +192,7 @@
       }
 
       // occasional shooting star
-      if (shooting) {
+      if (shooting && motion) {
         nextShot -= 16;
         if (nextShot <= 0) {
           nextShot = rand(shooting.every[0], shooting.every[1]);
@@ -183,11 +217,19 @@
     }
 
     function onMove(e) { mx = e.clientX / global.innerWidth; my = e.clientY / global.innerHeight; }
+    // gravity follows a real mouse only; a finger (or the synthetic mouse events a
+    // tap produces) must not bend the sky
+    function onPointerMove(e) {
+      if (e.pointerType !== 'mouse') return;
+      gTx = e.clientX; gTy = e.clientY;
+      if (!mouseIn) { gx = gTx; gy = gTy; mouseIn = true; }
+    }
     // Mouse: the full shockwave on press, exactly as before. Touch/pen: pressing
     // to scroll or swipe must not splash, so only a quick, still tap makes one,
     // and a gentler one (k scales displacement, boost and ring).
     var TOUCH_K = 0.35, touchDown = null;
     function onDown(e) {
+      if (!motion) return;
       if (e.pointerType === 'touch' || e.pointerType === 'pen') {
         touchDown = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now() };
         return;
@@ -196,6 +238,7 @@
     }
     function onUp(e) {
       var d = touchDown;
+      if (!motion) { touchDown = null; return; }
       if (!d || d.id !== e.pointerId) return;
       touchDown = null;
       var now = performance.now();
@@ -209,12 +252,21 @@
     global.addEventListener('resize', function () { resize(); });
     global.addEventListener('mousemove', onMove, { passive: true });
     global.addEventListener('pointerdown', onDown, { passive: true });
+    global.addEventListener('pointermove', onPointerMove, { passive: true });
+    document.addEventListener('mouseleave', function () { mouseIn = false; });
     global.addEventListener('pointerup', onUp, { passive: true });
     global.addEventListener('pointercancel', onCancel, { passive: true });
     raf = requestAnimationFrame(frame);
 
     return {
-      ripple: function (x, y) { ripples.push({ x: x, y: y, t: performance.now(), k: 1 }); },
+      setMotion: function (on) {
+        on = !!on;
+        if (on === motion) return;
+        motion = on;
+        if (!on) { ripples.length = 0; shots.length = 0; touchDown = null; }   // offsets ease back to rest
+      },
+      isMotion: function () { return motion; },
+      ripple: function (x, y) { if (!motion) return; ripples.push({ x: x, y: y, t: performance.now(), k: 1 }); },
       // recolour a live field without rebuilding it — used by the theme toggle
       setPalette: function (opts) {
         if (opts.layers) {

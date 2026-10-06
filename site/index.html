@@ -613,6 +613,24 @@ html[data-theme="light"] .ico-sun{display:none}
   .cur-root,.cur-trail,.scan{display:none!important}
   #spot{display:none}
 }
+
+/* ===== motion mode switch ===================================== */
+.strip .motionb svg{fill:currentColor;stroke:none}
+.strip .motionb .ico-stat{fill:none;stroke:currentColor;stroke-width:1.6}
+.strip .motionb:hover svg{transform:none}
+html[data-motion="static"] .strip .ico-adv{display:none}
+html:not([data-motion="static"]) .strip .ico-stat{display:none}
+.strip .motionb[aria-pressed="true"]{color:var(--ink)}
+@media (max-width:860px){
+  .strip .motionb{margin-left:auto;font-size:10px;gap:7px;padding:0 12px}
+  .strip .motionb svg{width:14px;height:14px}
+  .strip #themeBtn{margin-left:0}
+}
+
+/* static mode: nothing animates. Layout, colour and content are untouched. */
+html[data-motion="static"] *,html[data-motion="static"] *::before,html[data-motion="static"] *::after{
+  animation:none!important;transition-duration:.01ms!important;transition-delay:0s!important}
+html[data-motion="static"] .trow .eq i{height:7px}
 </style>
 </head>
 <body>
@@ -629,6 +647,11 @@ html[data-theme="light"] .ico-sun{display:none}
     <div class="cell">Feed <b id="feedTrk">IDLE</b></div>
     <div class="cell">Lat <b>41.7454 N</b> &nbsp; Lon <b>72.2851 W</b></div>
     <div class="cell push">UTC <b id="utc">--:--</b></div>
+    <button class="cell themeb motionb" id="motionBtn" data-hover="MOTION" aria-pressed="false">
+      <svg class="ico-adv" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.2 7.3 7.3 2.2-7.3 2.2L12 21.5l-2.2-7.3L2.5 12l7.3-2.2z"/></svg>
+      <svg class="ico-stat" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="6.5"/></svg>
+      <span id="motionLbl">Adventure</span>
+    </button>
     <button class="cell themeb" id="themeBtn" data-hover="THEME" aria-label="Toggle light mode">
       <svg class="ico-sun" viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="12" cy="12" r="4.1"/>

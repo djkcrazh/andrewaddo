@@ -10,8 +10,10 @@
   /* ---------------------------------------------------------------- field */
   var field = S.createStarfield($('stars'), {
     parallax: 20,
-    drift: { x: -4, y: 1 },
-    float: { amp: 14, speed: .35 },
+    drift: { x: -7, y: 1.8 },
+    float: { amp: 24, speed: .5 },
+    gravity: { radius: 300, pull: 120, swirl: .35 },
+    shooting: { every: [4500, 9500], speed: 620 },
     layers: [
       { count: 340, size: [.35, .8], depth: .2,  alpha: [.18, .45], color: '#ffffff' },
       { count: 120, size: [.7, 1.3], depth: .55, alpha: [.3, .7],   color: '#cfe6ff' },
@@ -125,6 +127,7 @@
   var nameEl = $('nameGlyph'), glyphs = $('glyphs');
   var ghosts = [$('ghost1'), $('ghost2')];
   var cells = [], isAure = false, busy = false, onHome = true;
+  var motionOn = true;                    // adventure (true) / static (false); see the mode switch below
 
   if (document.fonts && document.fonts.load) document.fonts.load('60px Aurebesh');
 
@@ -186,12 +189,21 @@
 
   (function holoLoop() {
     setTimeout(function () {
-      if (!onHome) { holoLoop(); return; }   // no point animating an off-screen view
+      if (!onHome || !motionOn) { holoLoop(); return; }   // off-screen, or the user asked for stillness
       isAure = !isAure;
       decode(isAure);
       holoLoop();
     }, isAure ? 500 + GLITCH_MS : 3000);
   })();
+
+  // static mode: drop back to the plain name with no glitch, once any decode in flight lands
+  function settleName(tries) {
+    if (motionOn || !isAure) return;
+    if (busy) { if (tries < 20) setTimeout(function () { settleName(tries + 1); }, 100); return; }
+    isAure = false;
+    cells.forEach(function (c) { c.el.textContent = c.ch === ' ' ? '\u00a0' : c.ch; c.el.className = ''; });
+    syncGhosts();
+  }
 
   /* ----------------------------------------------------------- new tabs ---
      Anything that leaves the dashboard opens in its own tab, so the clock,
@@ -507,6 +519,29 @@
   themeBtn.addEventListener('click', function () {
     applyTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light', true);
   });
+
+  /* ------------------------------------------------------ motion mode ---
+     Adventure (default): drifting stars, gravity, splash, name glitch.
+     Static: none of it. Changes only on the user's own click; the choice is
+     remembered, and nothing else (OS settings, resize, tab focus) flips it. */
+  var motionBtn = $('motionBtn'), motionLbl = $('motionLbl');
+
+  function applyMotion(on, persist) {
+    motionOn = on;
+    field.setMotion(on);
+    document.documentElement.dataset.motion = on ? 'adventure' : 'static';
+    motionLbl.textContent = on ? 'Adventure' : 'Static';
+    motionBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    motionBtn.setAttribute('aria-label', on ? 'Motion: adventure. Switch to static mode' : 'Motion: static. Switch to adventure mode');
+    if (!on) settleName(0);
+    if (persist) { try { localStorage.setItem('addo-motion', on ? 'adventure' : 'static'); } catch (e) {} }
+  }
+
+  var savedMotion = 'adventure';
+  try { savedMotion = localStorage.getItem('addo-motion') || 'adventure'; } catch (e) {}
+  applyMotion(savedMotion !== 'static', false);
+
+  motionBtn.addEventListener('click', function () { applyMotion(!motionOn, true); });
 
   /* ------------------------------------------------------- font modes ---
      WorkySpace is a brush face: gorgeous large, ambiguous at 10px. These three
