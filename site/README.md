@@ -233,12 +233,13 @@ If you would rather set Root Directory to `site` in the dashboard, move
 `vercel.json` into `site/` and delete the `outputDirectory` line, or the path
 resolves twice and the deploy 404s.
 
-### Fix these two URLs before you share the link
+### Live
 
-`index.html` has `canonical`, `og:url` and `og:image` hardcoded to
-`https://andrewaddo.vercel.app/`. **That is a guess.** Once you know the real
-domain, search-replace it. Wrong values mean the social preview silently breaks
-on every share, with no error anywhere.
+**https://andrewaddo.vercel.app** -- production, built from `main`.
+
+`canonical`, `og:url` and `og:image` in `index.html` are hardcoded to that
+domain. If you add a custom domain, search-replace them, or every social
+preview silently breaks with no error anywhere.
 
 `assets/images/og.png` is a 1200x630 shot of the home screen. Regenerate it if
 the design changes.
