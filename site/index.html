@@ -137,7 +137,7 @@ body::after{content:'';position:fixed;inset:0;z-index:55;pointer-events:none;
   background:repeating-linear-gradient(to bottom,var(--scan) 0 1px,transparent 1px 3px)}
 
 .shell{position:fixed;inset:26px;z-index:10;display:grid;
-  grid-template-columns:300px 1fr 344px;grid-template-rows:auto 1fr auto;gap:14px}
+  grid-template-columns:300px 1fr 344px;grid-template-rows:auto 1fr;gap:14px}
 
 /* ===== panel primitive ======================================== */
 .panel{
@@ -462,12 +462,6 @@ html[data-theme="light"] .ico-sun{display:none}
 .txlist button .n{opacity:.9;width:18px;flex:0 0 18px;font-family:var(--data);font-size:9px}
 .txlist button .d{margin-left:auto;opacity:.95;font-family:var(--data);font-size:9px}
 
-/* ===== footer ================================================= */
-.foot{grid-column:1/4;grid-row:3;display:flex;gap:14px;align-items:center;font-family:var(--micro);font-size:10.5px;
-  letter-spacing:.18em;color:var(--dim);text-transform:uppercase;height:24px}
-.foot b{color:var(--ink);font-weight:400;font-family:var(--data);font-size:9.5px}
-.foot .sp{margin-left:auto}
-.foot kbd{border:1px solid var(--line);padding:1px 6px;font-family:var(--data);font-size:9px;margin:0 2px}
 
 /* ===== cursor ================================================= */
 .cur-root{position:fixed;left:0;top:0;z-index:9999;pointer-events:none}
@@ -485,8 +479,140 @@ html[data-theme="light"] .ico-sun{display:none}
   font-family:var(--mono);font-size:9.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--blue);
   background:rgba(var(--void-rgb),.9);border:1px solid var(--line2);padding:8px 16px;opacity:0;transition:.3s}
 .toast.on{opacity:1;transform:translate(-50%,0)}
-.readout{position:fixed;z-index:9998;pointer-events:none;font-family:var(--data);font-size:8.5px;letter-spacing:.14em;
-  color:var(--blue);background:rgba(var(--void-rgb),.8);border:1px solid rgba(var(--accent-rgb),.3);padding:3px 7px;white-space:nowrap}
+
+/* ===== hamburger + mobile menu (hidden on desktop) ============= */
+.strip .menub{display:none;border:0;background:transparent;cursor:none;padding:0 14px;color:var(--ink)}
+.menub .bars{display:grid;gap:4px;width:18px}
+.menub .bars i{display:block;height:1.5px;background:currentColor;transition:transform .3s,opacity .2s}
+.menu-open .menub .bars i:nth-child(1){transform:translateY(5.5px) rotate(45deg)}
+.menu-open .menub .bars i:nth-child(2){opacity:0}
+.menu-open .menub .bars i:nth-child(3){transform:translateY(-5.5px) rotate(-45deg)}
+.mnav{display:none}
+
+/* ===== responsive ============================================= */
+/* windowed / small laptop: same three columns, tighter */
+@media (max-width:1180px){
+  .shell{inset:16px;gap:10px;grid-template-columns:230px 1fr 270px}
+  .vw{padding:34px 36px}
+  .chrono .big{font-size:42px}
+  .vwhead h2{font-size:38px}
+  .frame,.screen{inset:22px}
+  .attitude{left:22px;right:22px}
+  .strip .cell{padding:0 11px}
+  .strip .cell:nth-child(5){display:none}   /* lat / lon */
+}
+
+/* the centre pane can be narrow on a desktop too (windowed, 3 columns), so
+   reflow its content by the pane's own width rather than the viewport's */
+@container (max-width:640px){
+  .about{grid-template-columns:1fr;gap:22px}
+  .portrait{max-width:230px}
+  .pitem{grid-template-columns:26px 1fr;gap:12px}
+  .pitem .meta{grid-column:2;text-align:left;line-height:1.6}
+  .trow{grid-template-columns:26px 28px 1fr auto;gap:10px}
+  .trow .cd{display:none}
+  .chan a{grid-template-columns:78px 1fr auto;gap:10px}
+  .chan a .v{overflow-wrap:anywhere}
+  .skrow .nm{flex-basis:112px}
+  .resume{flex-wrap:wrap}
+}
+/* side columns scroll instead of spilling out of the frame in short windows */
+@media (min-width:861px){
+  .col-l,.col-r{overflow:auto;scrollbar-width:none}
+  .col-l::-webkit-scrollbar,.col-r::-webkit-scrollbar{display:none}
+}
+@media (max-height:680px) and (min-width:861px){
+  .col-l .panel.grow{display:none}
+}
+/* short windows: drop the low-value left-panel extras so nothing clips */
+@media (max-height:760px) and (min-width:861px){
+  .log{display:none}
+  .chrono .big{font-size:38px}
+  .arcwrap{margin-top:10px;padding-top:10px}
+  .col-l,.col-r{gap:10px}
+  .panel{padding:11px 13px}
+  .navlist a{padding:6px}
+}
+
+/* phone + narrow windows: one column, hamburger, no side panels */
+@media (max-width:860px){
+  html,body{height:100%;overflow:hidden}
+  .shell{position:fixed;inset:0;display:flex;flex-direction:column;gap:0;
+    padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+  .strip{flex:0 0 46px;height:46px;border-width:0 0 1px 0}
+  .strip .menub{display:flex}
+  .strip .cell{padding:0 12px}
+  .strip .cell:nth-child(n+3):not(.themeb){display:none}  /* keep menu, brand, theme */
+  .strip .themeb{margin-left:auto;font-size:0;gap:0;padding:0 16px}
+  .strip .themeb svg{width:18px;height:18px}
+  .strip .themeb #themeLbl{display:none}
+  .col-r,.frame,.attitude{display:none}
+
+  .view{flex:1;min-height:0;position:relative}
+  .screen{inset:0;-webkit-overflow-scrolling:touch}
+  .vw{padding:26px 20px 40px}
+  .vwhead{margin-bottom:22px}
+  .vwhead h2{font-size:34px}
+  .vwhead .lede{font-size:13px}
+
+  /* the dashboard is its own page on phones: col-l takes the view's place */
+  .col-l{display:none;flex:1;min-height:0;overflow:auto;padding:16px 16px 28px;gap:12px}
+  .col-l .panel.grow{flex:0 0 auto}
+  body.m-dash .col-l{display:flex}
+  body.m-dash .view{display:none}
+  .chrono .big{font-size:52px}
+
+  /* menu overlay */
+  .mnav{position:fixed;left:0;right:0;top:calc(46px + env(safe-area-inset-top));bottom:0;z-index:40;
+    background:rgba(var(--void-rgb),.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    padding:10px 20px 30px;overflow:auto;flex-direction:column}
+  .mnav:not([hidden]){display:flex;animation:vwin .3s cubic-bezier(.2,.8,.2,1)}
+  .mnav a{display:flex;align-items:center;gap:16px;padding:19px 4px;text-decoration:none;color:var(--dim);
+    border-bottom:1px solid var(--hair);font-family:var(--title);font-size:24px;letter-spacing:.02em}
+  .mnav a .n{font-family:var(--data);font-size:10px;letter-spacing:.1em;color:var(--dim)}
+  .mnav a.active{color:var(--blue)}
+  .mnav a.active .n{color:var(--blue)}
+
+  /* views */
+  .ident .tags{font-size:12px;letter-spacing:.14em}
+  .ident .tag{letter-spacing:.3em}
+  .about{grid-template-columns:1fr;gap:22px}
+  .portrait{max-width:230px}
+  .prose p{font-size:13px;line-height:1.85}
+  .pitem{grid-template-columns:26px 1fr;gap:12px;padding:16px 4px}
+  .pitem .meta{grid-column:2;text-align:left;line-height:1.6}
+  .pitem .meta .ext{opacity:1;transform:none;display:inline;margin-left:10px}
+  .pitem .t{font-size:17px}
+  .sksec-h h3{font-size:24px}
+  .skpanel{padding:14px 14px 10px}
+  .skrow .nm{flex-basis:112px;font-size:11.5px}
+  .resume{flex-wrap:wrap;padding:18px}
+  .bigwave{height:64px}
+  .soundmeta{flex-wrap:wrap;gap:6px}
+  .trow{grid-template-columns:26px 28px 1fr auto;gap:10px;padding:14px 4px}
+  .trow .cd{display:none}
+  .trow .tt{font-size:14px}
+  .chan a{grid-template-columns:78px 1fr auto;gap:10px;padding:15px 4px}
+  .chan a .v{font-size:13px;overflow-wrap:anywhere}
+  .cform{max-width:none}
+  .cform input,.cform textarea{font-size:16px}   /* stops iOS zooming on focus */
+  .toast{bottom:24px}
+}
+@media (max-width:420px){
+  .vw{padding:22px 16px 36px}
+  .vwhead h2{font-size:30px}
+  .skrow{flex-wrap:wrap;gap:6px}
+  .skrow .nm{flex-basis:100%}
+  .skrow .mb{flex-basis:100%}
+}
+
+/* touch devices: no custom cursor, no crosshair lines */
+@media (hover:none),(pointer:coarse){
+  body,.strip .themeb,.strip .menub,.origin-link,.pitem,.btn,.bigwave,.wave,.trow,.chan a,
+  .cform input,.cform textarea,.navlist a,.txctrl button,.txlist button{cursor:auto}
+  .cur-root,.cur-trail,.scan{display:none!important}
+  #spot{display:none}
+}
 </style>
 </head>
 <body>
@@ -495,6 +621,9 @@ html[data-theme="light"] .ico-sun{display:none}
 
 <div class="shell">
   <div class="strip">
+    <button class="cell menub" id="menuBtn" aria-label="Open menu" aria-expanded="false" aria-controls="mnav">
+      <span class="bars" aria-hidden="true"><i></i><i></i><i></i></span>
+    </button>
     <div class="cell"><span class="dotpulse"></span> <b>ADDO</b></div>
     <div class="cell">Sys <b>NOMINAL</b></div>
     <div class="cell">Feed <b id="feedTrk">IDLE</b></div>
@@ -705,17 +834,22 @@ html[data-theme="light"] .ico-sun{display:none}
     </div>
   </div>
 
-  <div class="foot">
-    <span>Rev 0.2</span><span>&middot;</span>
-    <span>Cursor <b id="curXY">0000 / 0000</b></span><span>&middot;</span>
-    <span>View <b id="curView">HOME</b></span>
-  </div>
 </div>
+
+<!-- phone / narrow-window menu; the desktop navigation panel is hidden there -->
+<nav class="mnav" id="mnav" aria-label="Main menu" hidden>
+  <a href="#home"      data-view="home"><span class="n">01</span>Home</a>
+  <a href="#about"     data-view="about"><span class="n">02</span>About</a>
+  <a href="#projects"  data-view="projects"><span class="n">03</span>Projects</a>
+  <a href="#skills"    data-view="skills"><span class="n">04</span>Skills</a>
+  <a href="#sound"     data-view="sound"><span class="n">05</span>Sound</a>
+  <a href="#contact"   data-view="contact"><span class="n">06</span>Contact</a>
+  <a href="#dashboard" data-view="dashboard"><span class="n">07</span>Module Dashboard</a>
+</nav>
 
 <div class="toast" id="toast"></div>
 <div class="scan" id="scanX"></div>
 <div class="scan" id="scanY"></div>
-<div class="readout" id="readout">X 0000 &middot; Y 0000</div>
 
 <script src="assets/core.js"></script>
 <script src="assets/tracks.js"></script>
