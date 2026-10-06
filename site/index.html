@@ -550,6 +550,9 @@ html[data-theme="light"] .ico-sun{display:none}
   .strip .themeb svg{width:18px;height:18px}
   .strip .themeb #themeLbl{display:none}
   .col-r,.frame,.attitude{display:none}
+  /* set by fitViewport() in site.js: the shell tracks the visible area, not the layout viewport */
+  html.vvfit .shell{top:var(--vv-top);bottom:auto;height:var(--vv-h)}
+  html.vvfit .mnav{top:calc(var(--vv-top) + 46px);bottom:auto;height:calc(var(--vv-h) - 46px)}
 
   .view{flex:1;min-height:0;position:relative}
   .screen{inset:0;-webkit-overflow-scrolling:touch}

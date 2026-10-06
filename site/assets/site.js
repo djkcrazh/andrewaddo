@@ -260,10 +260,45 @@
   });
   window.addEventListener('popstate', function () { go(location.hash.slice(1), false); });
   go(location.hash.slice(1) || 'home', false);
+  /* iOS Chrome/Safari can leave the layout viewport out of step with what is
+     actually visible (after the address bar has been focused and the page
+     reloaded), so a position:fixed shell pinned to inset:0 slides up under the
+     toolbar and the top bar with the hamburger disappears. On the phone layout
+     the shell is sized to the visual viewport instead, and re-fitted whenever
+     the browser chrome moves. */
+  var rootEl = document.documentElement;
+  function fitViewport() {
+    var v = window.visualViewport;
+    if (!v || !mobileMQ.matches || Math.abs(v.scale - 1) > 0.01) {
+      // desktop, or the user is pinch-zooming: let CSS inset:0 do its job
+      if (!v || !mobileMQ.matches) rootEl.classList.remove('vvfit');
+      return;
+    }
+    rootEl.style.setProperty('--vv-top', Math.max(0, v.offsetTop) + 'px');
+    rootEl.style.setProperty('--vv-h', v.height + 'px');
+    rootEl.classList.add('vvfit');
+  }
+  function fitSoon() {
+    fitViewport();
+    // the toolbar animates for a few hundred ms; keep correcting until it settles
+    [120, 400, 900].forEach(function (ms) { setTimeout(fitViewport, ms); });
+  }
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', fitViewport);
+    window.visualViewport.addEventListener('scroll', fitViewport);
+  }
+  window.addEventListener('resize', fitSoon);
+  window.addEventListener('orientationchange', fitSoon);
+  window.addEventListener('focus', fitSoon);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) fitSoon(); });
+  window.addEventListener('pageshow', fitSoon);
+  fitSoon();
+
   // A reload (or a back/forward restore) on a phone must land on a clean top bar:
   // no restored scroll offset, menu closed, and a forced repaint of the bar.
   if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
   window.addEventListener('pageshow', function () {
+    fitViewport();
     window.scrollTo(0, 0);
     setMenu(false);
     var strip = document.querySelector('.strip');
@@ -272,7 +307,7 @@
     strip.style.display = '';
   });
   // resizing across the breakpoint must not strand you on the dashboard page
-  var onBreak = function () { if (current === 'dashboard' && !mobileMQ.matches) go('home', false); else if (mobileMQ.matches === false) setMenu(false); };
+  var onBreak = function () { fitViewport(); if (current === 'dashboard' && !mobileMQ.matches) go('home', false); else if (mobileMQ.matches === false) setMenu(false); };
   if (mobileMQ.addEventListener) mobileMQ.addEventListener('change', onBreak); else mobileMQ.addListener(onBreak);
 
   /* ----------------------------------------------------- clock + solar ---- */
