@@ -8,12 +8,14 @@
   var $ = function (id) { return document.getElementById(id); };
 
   /* ---------------------------------------------------------------- field */
+  // phones and tablets get the same sky at a calmer pace
+  var gentle = window.matchMedia('(pointer:coarse),(max-width:860px)').matches;
   var field = S.createStarfield($('stars'), {
     parallax: 20,
-    drift: { x: -11, y: 2.6 },
-    float: { amp: 34, speed: .65 },
+    drift: gentle ? { x: -5, y: 1.2 } : { x: -11, y: 2.6 },
+    float: gentle ? { amp: 16, speed: .4 } : { amp: 34, speed: .65 },
     gravity: { radius: 400, pull: 140, swirl: .15 },
-    shooting: { every: [3000, 7000], speed: 700 },
+    shooting: gentle ? { every: [7000, 14000], speed: 520 } : { every: [3000, 7000], speed: 700 },
     layers: [
       { count: 340, size: [.35, .8], depth: .2,  alpha: [.18, .45], color: '#ffffff' },
       { count: 120, size: [.7, 1.3], depth: .55, alpha: [.3, .7],   color: '#cfe6ff' },
