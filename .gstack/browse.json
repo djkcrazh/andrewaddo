@@ -1,9 +1,0 @@
-{
-  "pid": 7518,
-  "port": 35525,
-  "token": "9cd42afc-fe80-4a33-9a73-68da5031d703",
-  "startedAt": "2026-09-25T15:59:30.858Z",
-  "serverPath": "/Users/andrewaddo/.claude/skills/gstack/browse/src/server.ts",
-  "mode": "launched",
-  "configHash": "303a7eeccc03078b"
-}

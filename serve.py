@@ -31,13 +31,18 @@ for ext, ctype in TYPES.items():
 class Handler(http.server.SimpleHTTPRequestHandler):
     extensions_map = {**http.server.SimpleHTTPRequestHandler.extensions_map, **TYPES}
 
+    # Only audio is cached locally: it is large, it never changes mid-session,
+    # and leaving it uncached made the Sound page re-download every track on
+    # every reload. Everything else -- html, js, pdf, images, fonts -- is
+    # no-store, so a file you just replaced shows up on refresh.
+    CACHEABLE = (".m4a", ".mp3", ".wav")
+
     def end_headers(self):
-        # no-store on source so edits show up, but let media cache -- otherwise
-        # the five metadata probes on the Sound page re-download every reload
-        if self.path.rsplit(".", 1)[-1].lower() in ("html", "js", "css", ""):
-            self.send_header("Cache-Control", "no-store")
-        else:
+        path = self.path.split("?", 1)[0].lower()
+        if path.endswith(self.CACHEABLE):
             self.send_header("Cache-Control", "public, max-age=3600")
+        else:
+            self.send_header("Cache-Control", "no-store")
         super().end_headers()
 
 
