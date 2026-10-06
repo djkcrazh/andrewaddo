@@ -10,7 +10,8 @@
   /* ---------------------------------------------------------------- field */
   var field = S.createStarfield($('stars'), {
     parallax: 20,
-    drift: { x: -1.1, y: .25 },
+    drift: { x: -4, y: 1 },
+    float: { amp: 14, speed: .35 },
     layers: [
       { count: 340, size: [.35, .8], depth: .2,  alpha: [.18, .45], color: '#ffffff' },
       { count: 120, size: [.7, 1.3], depth: .55, alpha: [.3, .7],   color: '#cfe6ff' },

@@ -27,6 +27,10 @@
     var drift = opts.drift || { x: -2.5, y: 0.6 };      // px per second
     var parallax = opts.parallax == null ? 26 : opts.parallax;
     var twinkle = opts.twinkle !== false;
+    // each star also wanders on its own slow loop, so the field breathes even when
+    // nothing is moving. {amp: px, speed: rad/s}; off when the user asks for less motion
+    var reduced = global.matchMedia && global.matchMedia('(prefers-reduced-motion:reduce)').matches;
+    var float = reduced ? null : opts.float || null;
     var rippleCfg = Object.assign(
       { speed: 620, width: 46, amplitude: 34, life: 1.9, ring: true, ringColor: '255,255,255', ringAlpha: 0.1 },
       opts.ripple || {}
@@ -58,6 +62,8 @@
             phase: Math.random() * TAU,
             tw: rand(0.4, 1.6),
             ox: 0, oy: 0,        // ripple offset
+            fp: Math.random() * TAU, fq: Math.random() * TAU,   // float phases
+            fs: rand(0.6, 1.4), fr: rand(0.5, 1),               // float speed / reach
             layer: li
           });
         }
@@ -89,6 +95,12 @@
         var s = stars[i];
         var x = s.nx * W + offX * s.depth + drift.x * t * s.depth;
         var y = s.ny * H + offY * s.depth + drift.y * t * s.depth;
+        if (float) {
+          // nearer stars wander further, which reads as depth
+          var fa = float.amp * s.fr * (0.4 + s.depth);
+          x += Math.sin(t * float.speed * s.fs + s.fp) * fa;
+          y += Math.cos(t * float.speed * s.fs * 0.8 + s.fq) * fa;
+        }
         // wrap
         x = ((x % W) + W) % W;
         y = ((y % H) + H) % H;
@@ -105,10 +117,10 @@
           var infl = Math.exp(-(band * band) / (2 * rippleCfg.width * rippleCfg.width));
           if (infl < 0.004) continue;
           var decay = 1 - age / rippleCfg.life;
-          var push = infl * rippleCfg.amplitude * decay * decay * (0.45 + s.depth);
+          var push = infl * rippleCfg.amplitude * R.k * decay * decay * (0.45 + s.depth);
           dx += (vx / d) * push;
           dy += (vy / d) * push;
-          boost = Math.max(boost, infl * decay);
+          boost = Math.max(boost, infl * decay * R.k);
         }
         s.ox = lerp(s.ox, dx, 0.28);
         s.oy = lerp(s.oy, dy, 0.28);
@@ -132,13 +144,13 @@
           var agek = (now - Rk.t) / 1000;
           var radk = agek * rippleCfg.speed;
           var fade = 1 - agek / rippleCfg.life;
-          ctx.globalAlpha = rippleCfg.ringAlpha * fade * fade;
+          ctx.globalAlpha = rippleCfg.ringAlpha * Rk.k * fade * fade;
           ctx.strokeStyle = 'rgba(' + rippleCfg.ringColor + ',1)';
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.arc(Rk.x, Rk.y, radk, 0, TAU);
           ctx.stroke();
-          ctx.globalAlpha = rippleCfg.ringAlpha * fade * fade * 0.5;
+          ctx.globalAlpha = rippleCfg.ringAlpha * Rk.k * fade * fade * 0.5;
           ctx.beginPath();
           ctx.arc(Rk.x, Rk.y, radk * 0.72, 0, TAU);
           ctx.stroke();
@@ -171,16 +183,38 @@
     }
 
     function onMove(e) { mx = e.clientX / global.innerWidth; my = e.clientY / global.innerHeight; }
-    function onDown(e) { ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() }); }
+    // Mouse: the full shockwave on press, exactly as before. Touch/pen: pressing
+    // to scroll or swipe must not splash, so only a quick, still tap makes one,
+    // and a gentler one (k scales displacement, boost and ring).
+    var TOUCH_K = 0.35, touchDown = null;
+    function onDown(e) {
+      if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+        touchDown = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now() };
+        return;
+      }
+      ripples.push({ x: e.clientX, y: e.clientY, t: performance.now(), k: 1 });
+    }
+    function onUp(e) {
+      var d = touchDown;
+      if (!d || d.id !== e.pointerId) return;
+      touchDown = null;
+      var now = performance.now();
+      if (now - d.t < 250 && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 10) {
+        ripples.push({ x: e.clientX, y: e.clientY, t: now, k: TOUCH_K });
+      }
+    }
+    function onCancel() { touchDown = null; }   // the browser took the gesture to scroll
 
     resize(); build();
     global.addEventListener('resize', function () { resize(); });
     global.addEventListener('mousemove', onMove, { passive: true });
     global.addEventListener('pointerdown', onDown, { passive: true });
+    global.addEventListener('pointerup', onUp, { passive: true });
+    global.addEventListener('pointercancel', onCancel, { passive: true });
     raf = requestAnimationFrame(frame);
 
     return {
-      ripple: function (x, y) { ripples.push({ x: x, y: y, t: performance.now() }); },
+      ripple: function (x, y) { ripples.push({ x: x, y: y, t: performance.now(), k: 1 }); },
       // recolour a live field without rebuilding it — used by the theme toggle
       setPalette: function (opts) {
         if (opts.layers) {
