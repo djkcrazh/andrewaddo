@@ -25,15 +25,11 @@
     hoverSelector: 'a,button,[data-hover],input,textarea,.wave,.bigwave,.trow,.pitem'
   });
 
-  var sX = $('scanX'), sY = $('scanY'), ro = $('readout'), cxy = $('curXY');
+  var sX = $('scanX'), sY = $('scanY');
   (function scan() {
     var p = cur.pos();
     sX.style.transform = 'translateY(' + p.y + 'px)';
     sY.style.transform = 'translateX(' + p.x + 'px)';
-    ro.style.transform = 'translate(' + (p.x + 18) + 'px,' + (p.y + 16) + 'px)';
-    var xs = String(Math.round(p.x)).padStart(4, '0'), ys = String(Math.round(p.y)).padStart(4, '0');
-    ro.textContent = 'X ' + xs + ' · Y ' + ys;
-    cxy.textContent = xs + ' / ' + ys;
     requestAnimationFrame(scan);
   })();
 
@@ -214,13 +210,28 @@
 
   /* -------------------------------------------------------------- routing */
   var VIEWS = ['home', 'about', 'projects', 'skills', 'sound', 'contact'];
-  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#navlist a'));
+  // 'dashboard' is only a page on the narrow layout, where the left column is hidden
+  var mobileMQ = window.matchMedia('(max-width:860px)');
+  var navLinks = Array.prototype.slice.call(document.querySelectorAll('#navlist a, #mnav a'));
+  var menuBtn = $('menuBtn'), mnav = $('mnav');
 
+  function setMenu(open) {
+    mnav.hidden = !open;
+    document.body.classList.toggle('menu-open', open);
+    menuBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+  }
+  menuBtn.addEventListener('click', function () { setMenu(mnav.hidden); });
+
+  var current = 'home';
   function go(view, push) {
-    if (VIEWS.indexOf(view) === -1) view = 'home';
+    if (view === 'dashboard' && !mobileMQ.matches) view = 'home';
+    else if (view !== 'dashboard' && VIEWS.indexOf(view) === -1) view = 'home';
+    current = view;
+    setMenu(false);
+    document.body.classList.toggle('m-dash', view === 'dashboard');
     VIEWS.forEach(function (v) { $('v-' + v).classList.toggle('on', v === view); });
     navLinks.forEach(function (a) { a.classList.toggle('active', a.dataset.view === view); });
-    $('curView').textContent = view.toUpperCase();
     $('screen').scrollTop = 0;
     onHome = view === 'home';
     $('attitude').style.opacity = onHome ? '1' : '0';
@@ -238,12 +249,15 @@
     var a = e.target.closest ? e.target.closest('a[href^="#"]') : null;
     if (!a) return;
     var v = a.getAttribute('href').slice(1);
-    if (VIEWS.indexOf(v) === -1) return;
+    if (VIEWS.indexOf(v) === -1 && v !== 'dashboard') return;
     e.preventDefault();
     go(v, true);
   });
   window.addEventListener('popstate', function () { go(location.hash.slice(1), false); });
   go(location.hash.slice(1) || 'home', false);
+  // resizing across the breakpoint must not strand you on the dashboard page
+  var onBreak = function () { if (current === 'dashboard' && !mobileMQ.matches) go('home', false); else if (mobileMQ.matches === false) setMenu(false); };
+  if (mobileMQ.addEventListener) mobileMQ.addEventListener('change', onBreak); else mobileMQ.addListener(onBreak);
 
   /* ----------------------------------------------------- clock + solar ---- */
   var LAT = 41.7701, LON = -72.3051;
@@ -515,6 +529,7 @@
   document.addEventListener('keydown', function (e) {
     var typing = /^(INPUT|TEXTAREA)$/.test(e.target.tagName);
     if (e.code === 'Space' && !typing) { e.preventDefault(); player.toggle(); }
+    if (e.key === 'Escape' && !mnav.hidden) setMenu(false);
     if (typing) return;
     if (e.code === 'ArrowRight') player.next();
     if (e.code === 'ArrowLeft') player.prev();
