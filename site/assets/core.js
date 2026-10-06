@@ -27,6 +27,14 @@
     var drift = opts.drift || { x: -2.5, y: 0.6 };      // px per second
     var parallax = opts.parallax == null ? 26 : opts.parallax;
     var twinkle = opts.twinkle !== false;
+    // each star also wanders on its own slow loop, so the field breathes even when
+    // nothing is moving. {amp: px, speed: rad/s}
+    var float = opts.float || null;
+    // gravity: the mouse bends nearby stars toward it. {radius, pull: px, swirl}
+    var gravity = opts.gravity || null;
+    // all motion maths runs on `mt`; dt is capped so a backgrounded tab does not leap ahead
+    var mt = 0, last = performance.now();
+    var gStr = 0, gx = 0, gy = 0, gTx = 0, gTy = 0, mouseIn = false;
     var rippleCfg = Object.assign(
       { speed: 620, width: 46, amplitude: 34, life: 1.9, ring: true, ringColor: '255,255,255', ringAlpha: 0.1 },
       opts.ripple || {}
@@ -58,6 +66,9 @@
             phase: Math.random() * TAU,
             tw: rand(0.4, 1.6),
             ox: 0, oy: 0,        // ripple offset
+            gx: 0, gy: 0,        // gravity offset
+            fp: Math.random() * TAU, fq: Math.random() * TAU,   // float phases
+            fs: rand(0.6, 1.4), fr: rand(0.5, 1),               // float speed / reach
             layer: li
           });
         }
@@ -72,11 +83,17 @@
     }
 
     function frame(now) {
-      var t = (now - t0) / 1000;
+      var dt = Math.min((now - last) / 1000, 0.1);   // a backgrounded tab must not leap ahead
+      last = now;
+      mt += dt;
+      var t = mt;
       ctx.clearRect(0, 0, W, H);
 
       px = lerp(px, mx, 0.055);
       py = lerp(py, my, 0.055);
+      // gravity strength eases in/out; the pointer it chases is smoothed too
+      gStr = lerp(gStr, mouseIn ? 1 : 0, 0.07);
+      gx = lerp(gx, gTx, 0.22); gy = lerp(gy, gTy, 0.22);
       var offX = (px - 0.5) * parallax;
       var offY = (py - 0.5) * parallax;
 
@@ -89,9 +106,33 @@
         var s = stars[i];
         var x = s.nx * W + offX * s.depth + drift.x * t * s.depth;
         var y = s.ny * H + offY * s.depth + drift.y * t * s.depth;
+        if (float) {
+          // nearer stars wander further, which reads as depth
+          var fa = float.amp * s.fr * (0.4 + s.depth);
+          x += Math.sin(t * float.speed * s.fs + s.fp) * fa;
+          y += Math.cos(t * float.speed * s.fs * 0.8 + s.fq) * fa;
+        }
         // wrap
         x = ((x % W) + W) % W;
         y = ((y % H) + H) % H;
+
+        // gravity well: stars fall toward the pointer, curving slightly as they go
+        var pgx = 0, pgy = 0, gl = 0;
+        if (gravity && gStr > 0.003) {
+          var ddx = gx - x, ddy = gy - y;
+          var dd = Math.sqrt(ddx * ddx + ddy * ddy) || 0.0001;
+          if (dd < gravity.radius) {
+            var f = 1 - dd / gravity.radius;
+            f *= f;
+            var stp = Math.min(f * gStr * gravity.pull * (0.55 + s.depth * 0.9), dd * 0.75);
+            var ux = ddx / dd, uy = ddy / dd;
+            pgx = ux * stp - uy * stp * gravity.swirl;
+            pgy = uy * stp + ux * stp * gravity.swirl;
+            gl = f * gStr;
+          }
+        }
+        s.gx = lerp(s.gx, pgx, 0.16);
+        s.gy = lerp(s.gy, pgy, 0.16);
 
         // shockwave displacement
         var dx = 0, dy = 0, boost = 0;
@@ -105,23 +146,23 @@
           var infl = Math.exp(-(band * band) / (2 * rippleCfg.width * rippleCfg.width));
           if (infl < 0.004) continue;
           var decay = 1 - age / rippleCfg.life;
-          var push = infl * rippleCfg.amplitude * decay * decay * (0.45 + s.depth);
+          var push = infl * rippleCfg.amplitude * R.k * decay * decay * (0.45 + s.depth);
           dx += (vx / d) * push;
           dy += (vy / d) * push;
-          boost = Math.max(boost, infl * decay);
+          boost = Math.max(boost, infl * decay * R.k);
         }
         s.ox = lerp(s.ox, dx, 0.28);
         s.oy = lerp(s.oy, dy, 0.28);
 
         var alpha = s.a;
         if (twinkle) alpha *= 0.62 + 0.38 * Math.sin(t * s.tw + s.phase);
-        alpha = clamp(alpha * alphaBoost + boost * 0.9, 0, 1);
+        alpha = clamp(alpha * alphaBoost + boost * 0.9 + gl * 0.6, 0, 1);
 
         ctx.globalAlpha = alpha;
         ctx.fillStyle = s.color;
-        var rr = s.r * (1 + boost * 0.8);
+        var rr = s.r * (1 + boost * 0.8 + gl * 0.9);
         ctx.beginPath();
-        ctx.arc(x + s.ox, y + s.oy, rr, 0, TAU);
+        ctx.arc(x + s.ox + s.gx, y + s.oy + s.gy, rr, 0, TAU);
         ctx.fill();
       }
 
@@ -132,13 +173,13 @@
           var agek = (now - Rk.t) / 1000;
           var radk = agek * rippleCfg.speed;
           var fade = 1 - agek / rippleCfg.life;
-          ctx.globalAlpha = rippleCfg.ringAlpha * fade * fade;
+          ctx.globalAlpha = rippleCfg.ringAlpha * Rk.k * fade * fade;
           ctx.strokeStyle = 'rgba(' + rippleCfg.ringColor + ',1)';
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.arc(Rk.x, Rk.y, radk, 0, TAU);
           ctx.stroke();
-          ctx.globalAlpha = rippleCfg.ringAlpha * fade * fade * 0.5;
+          ctx.globalAlpha = rippleCfg.ringAlpha * Rk.k * fade * fade * 0.5;
           ctx.beginPath();
           ctx.arc(Rk.x, Rk.y, radk * 0.72, 0, TAU);
           ctx.stroke();
@@ -171,16 +212,47 @@
     }
 
     function onMove(e) { mx = e.clientX / global.innerWidth; my = e.clientY / global.innerHeight; }
-    function onDown(e) { ripples.push({ x: e.clientX, y: e.clientY, t: performance.now() }); }
+    // gravity follows a real mouse only; a finger (or the synthetic mouse events a
+    // tap produces) must not bend the sky
+    function onPointerMove(e) {
+      if (e.pointerType !== 'mouse') return;
+      gTx = e.clientX; gTy = e.clientY;
+      if (!mouseIn) { gx = gTx; gy = gTy; mouseIn = true; }
+    }
+    // Mouse: the full shockwave on press, exactly as before. Touch/pen: pressing
+    // to scroll or swipe must not splash, so only a quick, still tap makes one,
+    // and a gentler one (k scales displacement, boost and ring).
+    var TOUCH_K = 0.35, touchDown = null;
+    function onDown(e) {
+      if (e.pointerType === 'touch' || e.pointerType === 'pen') {
+        touchDown = { id: e.pointerId, x: e.clientX, y: e.clientY, t: performance.now() };
+        return;
+      }
+      ripples.push({ x: e.clientX, y: e.clientY, t: performance.now(), k: 1 });
+    }
+    function onUp(e) {
+      var d = touchDown;
+      if (!d || d.id !== e.pointerId) return;
+      touchDown = null;
+      var now = performance.now();
+      if (now - d.t < 250 && Math.hypot(e.clientX - d.x, e.clientY - d.y) < 10) {
+        ripples.push({ x: e.clientX, y: e.clientY, t: now, k: TOUCH_K });
+      }
+    }
+    function onCancel() { touchDown = null; }   // the browser took the gesture to scroll
 
     resize(); build();
     global.addEventListener('resize', function () { resize(); });
     global.addEventListener('mousemove', onMove, { passive: true });
     global.addEventListener('pointerdown', onDown, { passive: true });
+    global.addEventListener('pointermove', onPointerMove, { passive: true });
+    document.addEventListener('mouseleave', function () { mouseIn = false; });
+    global.addEventListener('pointerup', onUp, { passive: true });
+    global.addEventListener('pointercancel', onCancel, { passive: true });
     raf = requestAnimationFrame(frame);
 
     return {
-      ripple: function (x, y) { ripples.push({ x: x, y: y, t: performance.now() }); },
+      ripple: function (x, y) { ripples.push({ x: x, y: y, t: performance.now(), k: 1 }); },
       // recolour a live field without rebuilding it — used by the theme toggle
       setPalette: function (opts) {
         if (opts.layers) {
