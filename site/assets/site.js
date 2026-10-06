@@ -12,7 +12,7 @@
     parallax: 20,
     drift: { x: -11, y: 2.6 },
     float: { amp: 34, speed: .65 },
-    gravity: { radius: 400, pull: 210, swirl: 0 },
+    gravity: { radius: 400, pull: 140, swirl: .15 },
     shooting: { every: [3000, 7000], speed: 700 },
     layers: [
       { count: 340, size: [.35, .8], depth: .2,  alpha: [.18, .45], color: '#ffffff' },
