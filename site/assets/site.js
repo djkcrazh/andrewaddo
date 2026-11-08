@@ -545,13 +545,15 @@
     field.setPalette({ layers: t.stars, ringColor: t.ring, ringAlpha: t.ringAlpha, alphaBoost: t.alphaBoost });
     spot.setConfig(t.spot);
     WAVE.on = t.wave.on; WAVE.off = t.wave.off; WAVE.head = t.wave.head;
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', name === 'light' ? '#eef3f8' : '#04060a');
     themeLbl.textContent = t.label;
     themeBtn.setAttribute('aria-label', 'Switch to ' + t.label.toLowerCase() + ' mode');
     if (persist) { try { localStorage.setItem('addo-theme', name); } catch (e) {} }
   }
 
-  var savedTheme = 'dark';
-  try { savedTheme = localStorage.getItem('addo-theme') || 'dark'; } catch (e) {}
+  var savedTheme = 'light';
+  try { savedTheme = localStorage.getItem('addo-theme') || 'light'; } catch (e) {}
   applyTheme(savedTheme, false);
 
   themeBtn.addEventListener('click', function () {

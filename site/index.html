@@ -1,12 +1,25 @@
 <!DOCTYPE html>
-<html lang="en" data-font="naru">
+<html lang="en" data-font="naru" data-theme="light">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Andrew Addo</title>
 <meta name="description" content="Andrew Addo: engineer and artist. Operations Research and Financial Engineering at Princeton." />
 <meta name="author" content="Andrew Addo" />
-<meta name="theme-color" content="#04060a" />
+<meta name="theme-color" content="#eef3f8" />
+
+<!-- Light is the default. Strip the attribute before first paint if this
+     visitor last chose dark, so returning users never flash the wrong ground. -->
+<script>
+(function(){try{
+  var t=localStorage.getItem('addo-theme');
+  if(t==='dark'){
+    document.documentElement.removeAttribute('data-theme');
+    var m=document.querySelector('meta[name="theme-color"]');
+    if(m)m.setAttribute('content','#04060a');
+  }
+}catch(e){}})();
+</script>
 <link rel="icon" href="/assets/images/favicon/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/assets/images/favicon/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/assets/images/favicon/favicon-16.png">
@@ -635,7 +648,7 @@ html[data-theme="light"] .ico-sun{display:none}
     <div class="cell">Feed <b id="feedTrk">IDLE</b></div>
     <div class="cell">Lat <b>41.7454 N</b> &nbsp; Lon <b>72.2851 W</b></div>
     <div class="cell push">UTC <b id="utc">--:--</b></div>
-    <button class="cell themeb" id="themeBtn" data-hover="THEME" aria-label="Toggle light mode">
+    <button class="cell themeb" id="themeBtn" data-hover="THEME" aria-label="Switch to dark mode">
       <svg class="ico-sun" viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="12" cy="12" r="4.1"/>
         <path d="M12 2.4v2.3M12 19.3v2.3M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.4 12h2.3M19.3 12h2.3M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"/>
@@ -643,7 +656,7 @@ html[data-theme="light"] .ico-sun{display:none}
       <svg class="ico-moon" viewBox="0 0 24 24" aria-hidden="true">
         <path d="M20.5 14.8A8.7 8.7 0 0 1 9.2 3.5a8.7 8.7 0 1 0 11.3 11.3z"/>
       </svg>
-      <span id="themeLbl">Light</span>
+      <span id="themeLbl">Dark</span>
     </button>
   </div>
 

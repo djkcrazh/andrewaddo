@@ -130,8 +130,11 @@ and strip labels all sat near 4:1, and the 9px track codes were at 2.5:1.
 
 ## Light mode
 
-The sun/moon button at the right of the header strip. Sun = you are in dark, click for
-light; moon = the reverse. The choice persists in `localStorage` under `addo-theme`.
+Light is the default: `<html>` ships with `data-theme="light"`, and an inline script in
+`<head>` strips the attribute before first paint when `localStorage` says the visitor
+last chose dark. The sun/moon button at the right of the header strip toggles it. Sun =
+you are in dark, click for light; moon = the reverse. The choice persists in
+`localStorage` under `addo-theme`.
 
 One lever does the whole theme: `--accent-rgb` and `--void-rgb` in `index.html`, since
 every border, tint, track, glow and hairline is derived from them. The two `<canvas>`
