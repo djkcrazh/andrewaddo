@@ -42,7 +42,7 @@
   /* Descriptions drafted from each repo's README -- correct them freely. */
   var PROJECTS = [
     { t: 'Nhoma Dashboard',
-      d: 'Pig farm management app: a herd ledger tracking breeding and 114-day gestation, weight history, market readiness and alerts.',
+      d: 'Pig farm management app that consolidates breeding data, weight history, market readiness, and facilitate alerts. Incorporates a built in chatbot, and utilizes agentic workflows to parse user CSV inputs and offer insights to improve farm operations.',
       stack: ['Next.js', 'TypeScript', 'SQL'], y: '2026',
       url: 'https://github.com/djkcrazh/nhoma' },
 
