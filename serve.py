@@ -50,7 +50,11 @@ if __name__ == "__main__":
     port = int(sys.argv[1]) if len(sys.argv) > 1 else 8743
     root = Path(__file__).parent / "site"
     handler = functools.partial(Handler, directory=str(root))
-    socketserver.TCPServer.allow_reuse_address = True
-    with socketserver.TCPServer(("", port), handler) as httpd:
+    # Threaded: Chrome opens the 6 MB mp3 and then stalls the connection, and a
+    # single-threaded server made every later request (the page itself) queue
+    # behind it for ~15s.
+    socketserver.ThreadingTCPServer.allow_reuse_address = True
+    socketserver.ThreadingTCPServer.daemon_threads = True
+    with socketserver.ThreadingTCPServer(("", port), handler) as httpd:
         print(f"serving {root} at http://localhost:{port}")
         httpd.serve_forever()
