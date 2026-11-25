@@ -402,7 +402,7 @@
     global.addEventListener('pointerdown', function () { down = true; root.classList.add('is-down'); });
     global.addEventListener('pointerup', function () { down = false; root.classList.remove('is-down'); });
     document.addEventListener('mouseleave', function () { root.classList.add('is-out'); });
-    document.addEventListener('mouseenter', function () { root.classList.remove('is-out'); });
+    document.addEventListener('mouseenter', function () { if (seenMouse) root.classList.remove('is-out'); });
 
     function tick() {
       var gx = tx, gy = ty;
