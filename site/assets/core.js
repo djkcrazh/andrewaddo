@@ -385,13 +385,21 @@
     sizeTrail();
     global.addEventListener('resize', sizeTrail);
 
-    var seenMouse = false;
+    // `hidden` is true until the first real pointer position, and again after the
+    // pointer leaves. Only a mousemove (which carries coordinates) may clear it:
+    // mouseenter has none, and returning from another app (Cmd-Tab, a minimised
+    // window) often fires no mouseenter at all because the pointer is already inside.
+    var hidden = true;
+    function reveal() {
+      if (!hidden) return;
+      hidden = false;
+      dx = rx = tx; dy = ry = ty;   // snap to the real position instead of gliding in from the old one
+      root.classList.remove('is-out');
+    }
+    function hide() { hidden = true; root.classList.add('is-out'); }
     global.addEventListener('mousemove', function (e) {
       tx = e.clientX; ty = e.clientY;
-      if (!seenMouse) {   // snap to the real position on first contact, then reveal
-        seenMouse = true; dx = rx = tx; dy = ry = ty;
-        root.classList.remove('is-out');
-      }
+      reveal();
       var el = e.target instanceof Element ? e.target.closest(opts.hoverSelector) : null;
       if (el !== hovering) {
         hovering = el;
@@ -401,8 +409,8 @@
     }, { passive: true });
     global.addEventListener('pointerdown', function () { down = true; root.classList.add('is-down'); });
     global.addEventListener('pointerup', function () { down = false; root.classList.remove('is-down'); });
-    document.addEventListener('mouseleave', function () { root.classList.add('is-out'); });
-    document.addEventListener('mouseenter', function () { if (seenMouse) root.classList.remove('is-out'); });
+    document.addEventListener('mouseleave', hide);
+    global.addEventListener('blur', hide);   // Cmd-Tab away: mouseleave doesn't always fire
 
     function tick() {
       var gx = tx, gy = ty;
