@@ -550,8 +550,8 @@
     if (persist) { try { localStorage.setItem('addo-theme', name); } catch (e) {} }
   }
 
-  var savedTheme = 'dark';
-  try { savedTheme = localStorage.getItem('addo-theme') || 'dark'; } catch (e) {}
+  var savedTheme = 'light';   // light is the default; a saved choice still wins
+  try { savedTheme = localStorage.getItem('addo-theme') || 'light'; } catch (e) {}
   applyTheme(savedTheme, false);
 
   themeBtn.addEventListener('click', function () {
