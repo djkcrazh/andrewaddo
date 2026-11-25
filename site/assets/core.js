@@ -83,7 +83,10 @@
     }
 
     function frame(now) {
+      // Schedule the next frame first: an exception below must never end the loop.
+      raf = requestAnimationFrame(frame);
       var dt = Math.min((now - last) / 1000, 0.1);   // a backgrounded tab must not leap ahead
+      var f60 = dt * 60;                              // frame-rate independent step (1 at 60fps)
       last = now;
       mt += dt;
       var t = mt;
@@ -170,7 +173,7 @@
       if (rippleCfg.ring) {
         for (var k = 0; k < ripples.length; k++) {
           var Rk = ripples[k];
-          var agek = (now - Rk.t) / 1000;
+          var agek = Math.max(0, (now - Rk.t) / 1000);   // click time can post-date the frame timestamp
           var radk = agek * rippleCfg.speed;
           var fade = 1 - agek / rippleCfg.life;
           ctx.globalAlpha = rippleCfg.ringAlpha * Rk.k * fade * fade;
@@ -188,14 +191,14 @@
 
       // occasional shooting star
       if (shooting) {
-        nextShot -= 16;
+        nextShot -= dt * 1000;
         if (nextShot <= 0) {
           nextShot = rand(shooting.every[0], shooting.every[1]);
           shots.push({ x: rand(0, W), y: rand(0, H * 0.6), vx: rand(-1, -0.35) * shooting.speed, vy: rand(0.2, 0.6) * shooting.speed, life: 1 });
         }
         for (var si = shots.length - 1; si >= 0; si--) {
           var sh = shots[si];
-          sh.x += sh.vx / 60; sh.y += sh.vy / 60; sh.life -= 0.012;
+          sh.x += sh.vx / 60 * f60; sh.y += sh.vy / 60 * f60; sh.life -= 0.012 * f60;
           if (sh.life <= 0) { shots.splice(si, 1); continue; }
           var g = ctx.createLinearGradient(sh.x, sh.y, sh.x - sh.vx * 0.06, sh.y - sh.vy * 0.06);
           g.addColorStop(0, 'rgba(255,255,255,' + (sh.life * 0.8) + ')');
@@ -208,7 +211,6 @@
       }
 
       ctx.globalAlpha = 1;
-      raf = requestAnimationFrame(frame);
     }
 
     function onMove(e) { mx = e.clientX / global.innerWidth; my = e.clientY / global.innerHeight; }
@@ -295,21 +297,32 @@
       canvas.style.width = global.innerWidth + 'px';
       canvas.style.height = global.innerHeight + 'px';
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      dirty = null; settled = false;
     }
 
+    // Only the glow's bounding box is cleared and repainted, and nothing is
+    // drawn once the glow has settled. Clearing the whole retina canvas every
+    // frame cost most of the main thread for a ~260px light.
+    var dirty = null, settled = false;
     function draw() {
-      ctx.clearRect(0, 0, global.innerWidth, global.innerHeight);
-      x = lerp(x, tx, config.smoothing);
-      y = lerp(y, ty, config.smoothing);
+      raf = requestAnimationFrame(draw);
+      var nx = lerp(x, tx, config.smoothing), ny = lerp(y, ty, config.smoothing);
+      if (Math.abs(nx - x) < 0.05 && Math.abs(ny - y) < 0.05) { nx = tx; ny = ty; }
+      var moved = nx !== x || ny !== y;
+      x = nx; y = ny;
+      if (!moved && settled) return;
+      settled = !moved;
+      if (dirty) { ctx.clearRect(dirty.x, dirty.y, dirty.w, dirty.h); dirty = null; }
       if (tx > -1000) {
-        var g = ctx.createRadialGradient(x, y, 0, x, y, config.radius);
+        var r = config.radius;
+        var g = ctx.createRadialGradient(x, y, 0, x, y, r);
         g.addColorStop(0, 'rgba(' + rgb + ',' + config.brightness + ')');
         g.addColorStop(0.45, 'rgba(' + rgb + ',' + config.brightness * 0.35 + ')');
         g.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = g;
-        ctx.fillRect(0, 0, global.innerWidth, global.innerHeight);
+        dirty = { x: Math.floor(x - r) - 1, y: Math.floor(y - r) - 1, w: Math.ceil(r * 2) + 2, h: Math.ceil(r * 2) + 2 };
+        ctx.fillRect(dirty.x, dirty.y, dirty.w, dirty.h);
       }
-      raf = requestAnimationFrame(draw);
     }
 
     resize();
@@ -322,6 +335,7 @@
         if (c.color) { config.color = c.color; rgb = hexToRgb(c.color); }
         if (c.brightness != null) config.brightness = c.brightness;
         if (c.radius != null) config.radius = c.radius;
+        settled = false;
         // on a light background 'screen' is a no-op; 'multiply' casts a soft shadow
         if (c.blend) { config.blend = c.blend; canvas.style.mixBlendMode = c.blend; }
       },
@@ -345,6 +359,7 @@
     var ring = document.createElement('div'); ring.className = 'cur-ring';
     root.appendChild(ring); root.appendChild(dot);
     document.body.appendChild(root);
+    root.classList.add('is-out');   // no pointer position yet: stay hidden instead of parking mid-screen
 
     var trailCanvas = null, tctx = null, history = [];
     if (opts.trail) {
@@ -370,8 +385,13 @@
     sizeTrail();
     global.addEventListener('resize', sizeTrail);
 
+    var seenMouse = false;
     global.addEventListener('mousemove', function (e) {
       tx = e.clientX; ty = e.clientY;
+      if (!seenMouse) {   // snap to the real position on first contact, then reveal
+        seenMouse = true; dx = rx = tx; dy = ry = ty;
+        root.classList.remove('is-out');
+      }
       var el = e.target instanceof Element ? e.target.closest(opts.hoverSelector) : null;
       if (el !== hovering) {
         hovering = el;

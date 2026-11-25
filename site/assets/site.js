@@ -426,7 +426,7 @@
   function wireWave(canvas, bars, playheadWidth) {
     var cx = canvas.getContext('2d');
     function size() {
-      canvas.width = canvas.clientWidth * dpr; canvas.height = canvas.clientHeight * dpr;
+      canvas.width = Math.round(canvas.clientWidth * dpr); canvas.height = Math.round(canvas.clientHeight * dpr);
       cx.setTransform(dpr, 0, 0, dpr, 0, 0);
     }
     window.addEventListener('resize', size);
